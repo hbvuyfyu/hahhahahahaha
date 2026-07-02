@@ -132,35 +132,56 @@ class CameraInjector(
     }
 
     /**
-     * For the VcplaxEngine path: if zoom/scale/pan are changed, write a pre-processed
-     * version of the media and hot-swap via switchSource so changes apply in real-time.
+     * For the VcplaxEngine path: monitor transform changes and apply in real-time.
+     *
+     * - Rotation/mirror: applied immediately via Binder (VcplaxEngine.setRotation/setMirror)
+     * - Zoom/scale/pan (images only): pre-processed bitmap written to temp file,
+     *   switchSource() swaps the source.
+     *
+     * IMPORTANT: Never restarts injection from here — that would break the running proxy.
+     * Only call switchSource when transforms are genuinely non-default.
      */
-    private suspend fun monitorVcplaxTransforms() {
+    private suspend fun monitorVcplaxTransforms() = withContext(Dispatchers.IO) {
         resetLastRendered()
 
         while (running) {
-            val z = zoomFactor; val s = frameFillScale
-            val px = panX; val py = panY
-            val r = rotation; val m = mirror
+            val z  = zoomFactor;  val s  = frameFillScale
+            val px = panX;        val py = panY
+            val r  = rotation;    val m  = mirror
 
             if (!transformsMatch(z, s, px, py, r, m)) {
-                // Apply rotation + mirror via binder (instant)
+                // 1. Rotation + mirror: always apply via Binder (zero-copy, instant)
                 VcplaxEngine.setRotation(r)
                 VcplaxEngine.setMirror(m)
 
-                // For zoom/scale/pan: pre-process and swap source if needed
-                if (z != lastRenderedZoom || s != lastRenderedScale ||
-                    px != lastRenderedPanX || py != lastRenderedPanY) {
-                    val rawBmp = withContext(Dispatchers.IO) {
-                        loadBitmapFullQuality(mediaPath)
+                // 2. Zoom/scale/pan for images: pre-process + switchSource
+                //    Only when at least one spatial transform is non-default.
+                //    For video, vcplax handles the stream directly — skip.
+                if (!isVideo &&
+                    (z != lastRenderedZoom || s != lastRenderedScale ||
+                     px != lastRenderedPanX || py != lastRenderedPanY)
+                ) {
+                    val needsSpatial = (z != 1f || s != 1f || px != 0 || py != 0)
+                    val sourcePath: String? = if (needsSpatial) {
+                        // Load → transform → write temp JPEG → switchSource
+                        val rawBmp = loadBitmapForInjection(mediaPath)
+                        if (rawBmp != null) {
+                            val transformed = applyTransformsWithValues(rawBmp, r, m, z, s, px, py)
+                            val tp = writeTempBitmap(transformed)
+                            if (transformed !== rawBmp) transformed.recycle()
+                            rawBmp.recycle()
+                            tp
+                        } else null
+                    } else {
+                        // Transforms back to default → restore original source
+                        mediaPath
                     }
-                    if (rawBmp != null) {
-                        val transformed = applyTransformsWithValues(rawBmp, r, m, z, s, px, py)
-                        val tempPath = writeTempBitmap(transformed)
-                        if (transformed !== rawBmp) transformed.recycle()
-                        rawBmp.recycle()
-                        if (tempPath != null) {
-                            VcplaxEngine.getProxy()?.switchSource(tempPath, 1)
+
+                    if (sourcePath != null) {
+                        try {
+                            VcplaxEngine.getProxy()?.switchSource(sourcePath, if (isVideo) 2 else 1)
+                        } catch (e: Exception) {
+                            Log.w(TAG, "switchSource failed: ${e.message}")
                         }
                     }
                 }
@@ -168,10 +189,6 @@ class CameraInjector(
                 updateLastRendered(z, s, px, py, r, m)
             }
 
-            if (!VcplaxEngine.isRunning) {
-                Log.w(TAG, "vcplax stopped unexpectedly — restarting")
-                VcplaxEngine.startInjection(mediaPath, loop = isVideo)
-            }
             delay(RENDER_POLL_MS)
         }
     }
@@ -276,10 +293,12 @@ class CameraInjector(
     /**
      * Real-time image streaming: re-renders whenever any transform parameter changes.
      * Polls every RENDER_POLL_MS ms — changes apply within ~80ms.
+     *
+     * The raw bitmap is loaded ONCE at startup (at a safe sample size),
+     * then re-transformed in the loop on every change — no repeated disk I/O.
      */
     private suspend fun streamImage() = withContext(Dispatchers.IO) {
-        // Load raw (full-quality, unprocessed) bitmap once
-        val rawBitmap = loadBitmapFullQuality(mediaPath)
+        val rawBitmap = loadBitmapForInjection(mediaPath)
         if (rawBitmap == null) {
             Log.e(TAG, "Cannot load image: $mediaPath"); return@withContext
         }
@@ -292,7 +311,6 @@ class CameraInjector(
                 val px = panX;       val py = panY
                 val r  = rotation;   val m  = mirror
 
-                // Re-render only when something changed (real-time, no delay on change)
                 if (!transformsMatch(z, s, px, py, r, m)) {
                     updateLastRendered(z, s, px, py, r, m)
                     val transformed = applyTransformsWithValues(rawBitmap, r, m, z, s, px, py)
@@ -362,17 +380,40 @@ class CameraInjector(
     // ── Bitmap loaders ──────────────────────────────────────────────────────
 
     /**
-     * Load bitmap at full quality (ARGB_8888, no downsampling).
+     * Load bitmap at the minimum sample size that still gives >= TARGET_W x TARGET_H pixels.
+     * This avoids OOM on high-resolution source images while maximising quality
+     * for the 1280×720 camera output.
+     *
+     * If the image is already smaller than the target (e.g., a low-res placeholder),
+     * it is loaded at inSampleSize=1 (full resolution).
      */
-    private fun loadBitmapFullQuality(path: String): Bitmap? {
+    private fun loadBitmapForInjection(path: String): Bitmap? {
         return try {
+            // Step 1: decode bounds only (no pixel allocation)
+            val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+            BitmapFactory.decodeFile(path, bounds)
+
+            if (bounds.outWidth <= 0 || bounds.outHeight <= 0) {
+                Log.e(TAG, "Cannot determine image dimensions: $path")
+                return null
+            }
+
+            // Step 2: find smallest power-of-2 sample that keeps >= TARGET dimensions
+            var sample = 1
+            while ((bounds.outWidth  / (sample * 2)) >= TARGET_W &&
+                   (bounds.outHeight / (sample * 2)) >= TARGET_H) {
+                sample *= 2
+            }
+
+            // Step 3: decode at chosen sample size
             val opts = BitmapFactory.Options().apply {
                 inPreferredConfig = Bitmap.Config.ARGB_8888
-                inSampleSize = 1
+                inSampleSize = sample
             }
+            Log.d(TAG, "loadBitmapForInjection: ${bounds.outWidth}x${bounds.outHeight} → sample=$sample")
             BitmapFactory.decodeFile(path, opts)
         } catch (e: Exception) {
-            Log.e(TAG, "loadBitmapFullQuality failed: ${e.message}")
+            Log.e(TAG, "loadBitmapForInjection failed: ${e.message}")
             null
         }
     }
@@ -385,15 +426,17 @@ class CameraInjector(
                 bmp.compress(Bitmap.CompressFormat.JPEG, 100, out)
             }
             f.absolutePath
-        } catch (e: Exception) { null }
+        } catch (e: Exception) {
+            Log.e(TAG, "writeTempBitmap failed: ${e.message}")
+            null
+        }
     }
 
     // ── Core transform pipeline ─────────────────────────────────────────────
 
     private fun loadAndTransformBitmap(path: String): Bitmap? {
-        val raw = loadBitmapFullQuality(path) ?: return null
-        val result = applyTransforms(raw)
-        return result
+        val raw = loadBitmapForInjection(path) ?: return null
+        return applyTransforms(raw)
     }
 
     /**
