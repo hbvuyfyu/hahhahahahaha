@@ -278,68 +278,68 @@ class CameraInjector(
     private fun loadAndTransformBitmap(path: String): Bitmap? {
         val raw = try { BitmapFactory.decodeFile(path) ?: return null }
                   catch (e: Exception) { return null }
-        return applyTransforms(raw)
+        val result = applyTransforms(raw)
+        // If applyTransforms returned a different instance the original raw has
+        // already been recycled inside the pipeline; if it returned the same
+        // object we must NOT recycle it here because it IS the result.
+        return result
     }
 
     /**
-     * Apply all transforms in order:
-     *   1. Rotation + mirror (existing)
-     *   2. Digital zoom  — crops into the image center by zoomFactor
-     *   3. Pan           — shifts the crop window by (panX, panY) source pixels
-     *   4. Frame scale   — letterboxes/pillarboxes the result into the output frame
+     * Apply all transforms in order through an explicit ownership pipeline:
+     *   1. Rotation + mirror  → `stage1`  (may == src if no-op)
+     *   2. Digital zoom + pan → `stage2`  (may == stage1 if no-op)
+     *   3. Frame scale        → `stage3`  (may == stage2 if no-op)
      *
-     * Zoom and pan are applied by computing a crop rectangle on the
-     * (possibly rotated/mirrored) bitmap, then scaling the crop to TARGET_W×TARGET_H.
-     * Frame scale further shrinks that result and composites it onto a black canvas.
+     * Each step recycles the previous stage if it produced a new bitmap.
+     * The original `src` is NEVER recycled here — callers own it and decide
+     * when to recycle (stream loops recycle frame bitmaps after push).
      */
     private fun applyTransforms(src: Bitmap): Bitmap {
-        // 1. Rotation + mirror
-        val base: Bitmap = if (rotation != 0 || mirror) {
+        // ── Stage 1: rotation + mirror ───────────────────────────────────────
+        val stage1: Bitmap = if (rotation != 0 || mirror) {
             val m = Matrix()
             if (rotation != 0) m.postRotate(rotation.toFloat())
             if (mirror) m.postScale(-1f, 1f, src.width / 2f, src.height / 2f)
             Bitmap.createBitmap(src, 0, 0, src.width, src.height, m, true)
+            // src is owned by the caller; do not recycle it here
         } else src
 
-        // 2 & 3. Zoom + pan crop
+        // ── Stage 2: digital zoom + pan (crop) ──────────────────────────────
         val zoom = zoomFactor.coerceIn(1f, 5f)
         val px   = panX
         val py   = panY
 
-        val zoomed: Bitmap = if (zoom != 1f || px != 0 || py != 0) {
-            val cropW = (base.width  / zoom).toInt().coerceAtLeast(1)
-            val cropH = (base.height / zoom).toInt().coerceAtLeast(1)
-
-            // Center of crop, offset by pan
-            val centerX = base.width  / 2 + px
-            val centerY = base.height / 2 + py
-            val left = (centerX - cropW / 2).coerceIn(0, (base.width  - cropW).coerceAtLeast(0))
-            val top  = (centerY - cropH / 2).coerceIn(0, (base.height - cropH).coerceAtLeast(0))
-
-            val cropped = Bitmap.createBitmap(base, left, top, cropW, cropH)
-            if (base !== src) base.recycle()
+        val stage2: Bitmap = if (zoom != 1f || px != 0 || py != 0) {
+            val cropW = (stage1.width  / zoom).toInt().coerceAtLeast(1)
+            val cropH = (stage1.height / zoom).toInt().coerceAtLeast(1)
+            val centerX = stage1.width  / 2 + px
+            val centerY = stage1.height / 2 + py
+            val left = (centerX - cropW / 2).coerceIn(0, (stage1.width  - cropW).coerceAtLeast(0))
+            val top  = (centerY - cropH / 2).coerceIn(0, (stage1.height - cropH).coerceAtLeast(0))
+            val cropped = Bitmap.createBitmap(stage1, left, top, cropW, cropH)
+            if (stage1 !== src) stage1.recycle()   // stage1 was a new intermediate → recycle it
             cropped
-        } else base
+        } else stage1
 
-        // 4. Frame scale (letterbox / pillarbox)
+        // ── Stage 3: frame-fill scale (letterbox / pillarbox) ───────────────
         val scale = frameFillScale.coerceIn(0.1f, 2f)
-        return if (scale != 1f) {
+        val stage3: Bitmap = if (scale != 1f) {
             val scaledW = (TARGET_W * scale).toInt().coerceAtLeast(1)
             val scaledH = (TARGET_H * scale).toInt().coerceAtLeast(1)
-            val scaled  = Bitmap.createScaledBitmap(zoomed, scaledW, scaledH, true)
-            if (zoomed !== src && zoomed !== base) zoomed.recycle()
+            val scaled  = Bitmap.createScaledBitmap(stage2, scaledW, scaledH, true)
+            if (stage2 !== src) stage2.recycle()   // stage2 was a new intermediate → recycle it
 
             val canvas = Bitmap.createBitmap(TARGET_W, TARGET_H, Bitmap.Config.ARGB_8888)
-            val c = Canvas(canvas)
-            c.drawARGB(255, 0, 0, 0)  // black background
-            val dx = (TARGET_W - scaledW) / 2f
-            val dy = (TARGET_H - scaledH) / 2f
-            c.drawBitmap(scaled, dx, dy, null)
+            Canvas(canvas).apply {
+                drawARGB(255, 0, 0, 0)             // black background
+                drawBitmap(scaled, (TARGET_W - scaledW) / 2f, (TARGET_H - scaledH) / 2f, null)
+            }
             scaled.recycle()
             canvas
-        } else {
-            zoomed
-        }
+        } else stage2
+
+        return stage3
     }
 
     private fun bitmapToYUYV(src: Bitmap, outW: Int, outH: Int): ByteArray {
