@@ -14,14 +14,17 @@ import com.vcam.utils.MediaSlotManager
 import com.vcam.utils.RootManager
 import com.vcam.utils.VcplaxEngine
 import kotlinx.coroutines.*
+import org.json.JSONObject
 
 class VCamService : Service() {
 
     companion object {
         const val ACTION_START          = "com.vcam.ACTION_START"
         const val ACTION_STOP           = "com.vcam.ACTION_STOP"
-        const val EXTRA_MEDIA_URI       = "extra_media_uri"   // kept for compatibility
-        const val EXTRA_MEDIA_PATH      = "extra_media_path"  // preferred: absolute path
+        const val ACTION_ENABLE_LINK    = "com.vcam.ACTION_ENABLE_LINK"
+        const val ACTION_DISABLE_LINK   = "com.vcam.ACTION_DISABLE_LINK"
+        const val EXTRA_MEDIA_URI       = "extra_media_uri"
+        const val EXTRA_MEDIA_PATH      = "extra_media_path"
         const val EXTRA_TARGET_PACKAGE  = "extra_target_package"
         const val EXTRA_TARGET_NAME     = "extra_target_name"
         const val EXTRA_IS_VIDEO        = "extra_is_video"
@@ -32,8 +35,9 @@ class VCamService : Service() {
 
     private val serviceScope = CoroutineScope(Dispatchers.IO + Job())
     private var injector: CameraInjector? = null
+    private var connectServer: ConnectServer? = null
 
-    /** Receives rotation / mirror / slot-switch / zoom / scale / pan commands from FloatWindowService */
+    /** Receives rotation / mirror / slot / zoom / scale / pan commands from FloatWindowService */
     private val controlReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             when (intent.action) {
@@ -53,41 +57,32 @@ class VCamService : Service() {
                 }
                 FloatWindowService.ACTION_STOP_VCAM -> {
                     stopInjection()
+                    stopFloatWindow()
                     stopForeground(STOP_FOREGROUND_REMOVE)
                     stopSelf()
                 }
-
-                // ── Zoom ──
                 FloatWindowService.ACTION_ZOOM_IN,
                 FloatWindowService.ACTION_ZOOM_OUT -> {
                     val zoom = intent.getFloatExtra(FloatWindowService.EXTRA_ZOOM_FACTOR, 1f)
                     injector?.zoomFactor = zoom
                 }
-
-                // ── Scale ──
                 FloatWindowService.ACTION_SCALE_UP,
                 FloatWindowService.ACTION_SCALE_DOWN -> {
                     val scale = intent.getFloatExtra(FloatWindowService.EXTRA_SCALE_FACTOR, 1f)
                     injector?.frameFillScale = scale
                 }
-
-                // ── Pan ──
                 FloatWindowService.ACTION_PAN_UP,
                 FloatWindowService.ACTION_PAN_DOWN,
                 FloatWindowService.ACTION_PAN_LEFT,
                 FloatWindowService.ACTION_PAN_RIGHT -> {
-                    val px = intent.getIntExtra(FloatWindowService.EXTRA_PAN_X, 0)
-                    val py = intent.getIntExtra(FloatWindowService.EXTRA_PAN_Y, 0)
-                    injector?.panX = px
-                    injector?.panY = py
+                    injector?.panX = intent.getIntExtra(FloatWindowService.EXTRA_PAN_X, 0)
+                    injector?.panY = intent.getIntExtra(FloatWindowService.EXTRA_PAN_Y, 0)
                 }
-
-                // ── Reset all transforms ──
                 FloatWindowService.ACTION_PAN_RESET -> {
-                    injector?.zoomFactor    = 1f
+                    injector?.zoomFactor     = 1f
                     injector?.frameFillScale = 1f
-                    injector?.panX          = 0
-                    injector?.panY          = 0
+                    injector?.panX           = 0
+                    injector?.panY           = 0
                 }
             }
         }
@@ -116,20 +111,25 @@ class VCamService : Service() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             registerReceiver(controlReceiver, filter, RECEIVER_NOT_EXPORTED)
         } else {
+            @Suppress("UnspecifiedRegisterReceiverFlag")
             registerReceiver(controlReceiver, filter)
         }
+
+        // Start ConnectServer if link was previously enabled
+        if (ConnectServer.isEnabled(this)) startConnectServer()
     }
 
     override fun onDestroy() {
         unregisterReceiver(controlReceiver)
         stopFloatWindow()
+        stopConnectServer()
+        serviceScope.cancel()
         super.onDestroy()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         when (intent?.action) {
             ACTION_START -> {
-                // Accept either a raw path (preferred) or a URI (legacy)
                 val mediaPath: String? = intent.getStringExtra(EXTRA_MEDIA_PATH)
                     ?: intent.getStringExtra(EXTRA_MEDIA_URI)?.let { uriStr ->
                         try {
@@ -154,8 +154,17 @@ class VCamService : Service() {
             ACTION_STOP -> {
                 stopInjection()
                 stopFloatWindow()
+                stopConnectServer()
                 stopForeground(STOP_FOREGROUND_REMOVE)
                 stopSelf()
+            }
+            ACTION_ENABLE_LINK -> {
+                ConnectServer.setEnabled(this, true)
+                startConnectServer()
+            }
+            ACTION_DISABLE_LINK -> {
+                ConnectServer.setEnabled(this, false)
+                stopConnectServer()
             }
         }
         return START_STICKY
@@ -184,22 +193,21 @@ class VCamService : Service() {
         }
     }
 
-    /** Hot-swap to a different media slot while injection is running. */
     private fun switchToSlot(slot: Int) {
         val path    = MediaSlotManager.getSlotPath(this, slot) ?: return
         val isVideo = MediaSlotManager.isSlotVideo(this, slot)
         serviceScope.launch {
             try {
-                // Try vcplax hot-swap first (no interruption)
                 val proxy = VcplaxEngine.getProxy()
                 if (proxy != null && VcplaxEngine.isRunning) {
                     proxy.switchSource(path, if (isVideo) 2 else 1)
                 } else {
-                    // Restart injection with new media, preserving current transforms
-                    val prevZoom  = injector?.zoomFactor   ?: 1f
+                    val prevZoom  = injector?.zoomFactor    ?: 1f
                     val prevScale = injector?.frameFillScale ?: 1f
-                    val prevPanX  = injector?.panX          ?: 0
-                    val prevPanY  = injector?.panY          ?: 0
+                    val prevPanX  = injector?.panX           ?: 0
+                    val prevPanY  = injector?.panY           ?: 0
+                    val prevRot   = injector?.rotation       ?: 0
+                    val prevMirr  = injector?.mirror         ?: false
                     injector?.stop()
                     injector = CameraInjector(
                         context       = this@VCamService,
@@ -211,6 +219,8 @@ class VCamService : Service() {
                         it.frameFillScale = prevScale
                         it.panX          = prevPanX
                         it.panY          = prevPanY
+                        it.rotation      = prevRot
+                        it.mirror        = prevMirr
                     }
                     injector?.start()
                 }
@@ -223,6 +233,77 @@ class VCamService : Service() {
     private fun stopInjection() {
         injector?.stop()
         injector = null
+    }
+
+    // ── ConnectServer (link to Windows app) ───────────────────────────
+
+    private fun startConnectServer() {
+        if (connectServer != null) return
+        connectServer = ConnectServer(this) { cmd, params ->
+            handleRemoteCommand(cmd, params)
+        }
+        connectServer?.start()
+    }
+
+    private fun stopConnectServer() {
+        connectServer?.stop()
+        connectServer = null
+    }
+
+    /**
+     * Handle commands from the Windows "conect vcam" app.
+     * Changes apply to the live injector in real-time.
+     */
+    private fun handleRemoteCommand(cmd: String, params: JSONObject) {
+        val inj = injector
+        when (cmd) {
+            "zoom" -> {
+                val v = params.optDouble("value", 1.0).toFloat().coerceIn(1f, 5f)
+                inj?.zoomFactor = v
+                // Also broadcast to float window to update its label
+                sendBroadcast(Intent(FloatWindowService.ACTION_ZOOM_IN)
+                    .putExtra(FloatWindowService.EXTRA_ZOOM_FACTOR, v))
+            }
+            "scale" -> {
+                val v = params.optDouble("value", 1.0).toFloat().coerceIn(0.3f, 2f)
+                inj?.frameFillScale = v
+                sendBroadcast(Intent(FloatWindowService.ACTION_SCALE_UP)
+                    .putExtra(FloatWindowService.EXTRA_SCALE_FACTOR, v))
+            }
+            "pan" -> {
+                val px = params.optInt("x", 0)
+                val py = params.optInt("y", 0)
+                inj?.panX = px
+                inj?.panY = py
+                sendBroadcast(Intent(FloatWindowService.ACTION_PAN_RIGHT)
+                    .putExtra(FloatWindowService.EXTRA_PAN_X, px)
+                    .putExtra(FloatWindowService.EXTRA_PAN_Y, py))
+            }
+            "pan_reset" -> {
+                inj?.zoomFactor     = 1f
+                inj?.frameFillScale = 1f
+                inj?.panX           = 0
+                inj?.panY           = 0
+                sendBroadcast(Intent(FloatWindowService.ACTION_PAN_RESET)
+                    .putExtra(FloatWindowService.EXTRA_PAN_X, 0)
+                    .putExtra(FloatWindowService.EXTRA_PAN_Y, 0)
+                    .putExtra(FloatWindowService.EXTRA_ZOOM_FACTOR, 1f)
+                    .putExtra(FloatWindowService.EXTRA_SCALE_FACTOR, 1f))
+            }
+            "rotate" -> {
+                val deg = params.optInt("degrees", 0) % 360
+                inj?.rotation = deg
+                VcplaxEngine.setRotation(deg)
+                sendBroadcast(Intent(FloatWindowService.ACTION_ROTATE).putExtra("rotation", deg))
+            }
+            "mirror" -> {
+                val enabled = params.optBoolean("enabled", false)
+                inj?.mirror = enabled
+                VcplaxEngine.setMirror(enabled)
+                sendBroadcast(Intent(FloatWindowService.ACTION_MIRROR).putExtra("mirror", enabled))
+            }
+            "info" -> { /* responded by ConnectServer's ok() */ }
+        }
     }
 
     // ── Float window ──────────────────────────────────────────────────

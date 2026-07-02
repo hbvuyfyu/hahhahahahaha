@@ -17,8 +17,10 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
+import com.google.android.material.switchmaterial.SwitchMaterial
 import com.vcam.R
 import com.vcam.databinding.ActivityMainBinding
+import com.vcam.service.ConnectServer
 import com.vcam.service.VCamService
 import com.vcam.utils.LicenseChecker
 import com.vcam.utils.MediaSlotManager
@@ -68,6 +70,7 @@ class MainActivity : AppCompatActivity() {
         setupSlotPickers()
         setupRotateButtons()
         setupStartStop()
+        setupLinkSwitch()
         requestPermissions()
         (1..5).forEach { refreshSlotUI(it) }
         binding.btnStartStop.isEnabled = MediaSlotManager.isSlotSet(this, 1)
@@ -85,6 +88,8 @@ class MainActivity : AppCompatActivity() {
                 logoutToCodeScreen()
             }
         }
+        // Refresh link UI state
+        refreshLinkUI()
     }
 
     private fun logoutToCodeScreen() {
@@ -139,7 +144,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // ── Rotate buttons (slots 1-4, images only) ───────────────────────────
+    // ── Rotate buttons ────────────────────────────────────────────────────
 
     private fun setupRotateButtons() {
         listOf(
@@ -161,7 +166,43 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // ── Refresh slot thumbnail + status + rotate button visibility ────────
+    // ── Link switch ───────────────────────────────────────────────────────
+
+    private fun setupLinkSwitch() {
+        val sw = binding.root.findViewById<SwitchMaterial>(R.id.switch_link) ?: return
+        sw.isChecked = ConnectServer.isEnabled(this)
+        sw.setOnCheckedChangeListener { _, isChecked ->
+            ConnectServer.setEnabled(this, isChecked)
+            val action = if (isChecked) VCamService.ACTION_ENABLE_LINK
+                         else           VCamService.ACTION_DISABLE_LINK
+            try {
+                startService(Intent(this, VCamService::class.java).apply { this.action = action })
+            } catch (_: Exception) {}
+            refreshLinkUI()
+            showSnack(
+                if (isChecked) getString(R.string.link_enabled_msg)
+                else           getString(R.string.link_disabled_msg)
+            )
+        }
+    }
+
+    private fun refreshLinkUI() {
+        val enabled    = ConnectServer.isEnabled(this)
+        val sw         = binding.root.findViewById<SwitchMaterial>(R.id.switch_link) ?: return
+        val infoLayout = binding.root.findViewById<View>(R.id.layout_link_info) ?: return
+        val tvPort     = binding.root.findViewById<TextView>(R.id.tv_link_port)
+        val tvToken    = binding.root.findViewById<TextView>(R.id.tv_link_token)
+
+        sw.isChecked = enabled
+        infoLayout.visibility = if (enabled) View.VISIBLE else View.GONE
+
+        if (enabled) {
+            tvPort?.text  = getString(R.string.link_port, ConnectServer.PORT)
+            tvToken?.text = getString(R.string.link_token, ConnectServer.getToken(this))
+        }
+    }
+
+    // ── Refresh slot thumbnail ────────────────────────────────────────────
 
     private fun refreshSlotUI(slot: Int) {
         val ivId = when (slot) {
@@ -185,7 +226,7 @@ class MainActivity : AppCompatActivity() {
         if (MediaSlotManager.isSlotSet(this, slot)) {
             tv.text    = getString(R.string.slot_ready)
             tv.setTextColor(0xFF22C55E.toInt())
-            iv.visibility = View.VISIBLE
+            iv.visibility  = View.VISIBLE
             rot?.visibility = View.VISIBLE
 
             lifecycleScope.launch {
@@ -197,7 +238,7 @@ class MainActivity : AppCompatActivity() {
         } else {
             tv.text = getString(R.string.slot_empty)
             tv.setTextColor(0xFF555555.toInt())
-            iv.visibility = View.GONE
+            iv.visibility  = View.GONE
             rot?.visibility = View.GONE
         }
     }

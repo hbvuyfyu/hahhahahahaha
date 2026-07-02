@@ -44,4 +44,13 @@
     <string name="rotate_label">تدوير %d°</string>
     <string name="mirror_on">عكس: مفعّل</string>
     <string name="mirror_off">عكس: معطّل</string>
+    <!-- Link / Connect -->
+    <string name="link_title">🔗 الربط بالحاسوب (Conect VCam)</string>
+    <string name="link_enable">تفعيل الربط</string>
+    <string name="link_disable">إيقاف الربط</string>
+    <string name="link_port">المنفذ: %d</string>
+    <string name="link_token">الرمز: %s</string>
+    <string name="link_hint">وصّل الهاتف بالحاسوب عبر USB، ثم شغّل:\nadb forward tcp:7979 tcp:7979\nوأدخل الرمز في تطبيق Conect VCam</string>
+    <string name="link_enabled_msg">تم تفعيل الربط — المنفذ 7979</string>
+    <string name="link_disabled_msg">تم إيقاف الربط</string>
 </resources>

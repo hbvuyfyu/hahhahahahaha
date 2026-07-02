@@ -1,4 +1,4 @@
-name: Build Virtual Cam APK
+name: Build Virtual Cam
 
 on:
   push:
@@ -11,10 +11,12 @@ permissions:
   contents: write
 
 jobs:
-  build:
-    name: Build Debug & Release APK
+
+  # ── Android APK ──────────────────────────────────────────────────────────
+  build-android:
+    name: Build Android APK
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 40
 
     steps:
       - name: Checkout code
@@ -78,25 +80,96 @@ jobs:
           path: app/build/outputs/apk/release/app-release-unsigned.apk
           retention-days: 30
 
+  # ── Windows "Conect VCam" exe ─────────────────────────────────────────────
+  build-windows:
+    name: Build Windows Conect VCam.exe
+    runs-on: windows-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install PyInstaller
+        run: pip install pyinstaller
+
+      - name: Build Windows exe
+        working-directory: conect_vcam
+        run: pyinstaller conect_vcam.spec --noconfirm --clean
+
+      - name: Upload Windows exe
+        uses: actions/upload-artifact@v4
+        with:
+          name: ConectVCam-Windows-exe
+          path: conect_vcam/dist/ConectVCam.exe
+          retention-days: 30
+
+  # ── GitHub Release (main branch only) ────────────────────────────────────
+  release:
+    name: Create GitHub Release
+    needs: [build-android, build-windows]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+
+    steps:
+      - name: Download Android Debug APK
+        uses: actions/download-artifact@v4
+        with:
+          name: VirtualCam-Debug-APK
+          path: artifacts/
+
+      - name: Download Android Release APK
+        uses: actions/download-artifact@v4
+        with:
+          name: VirtualCam-Release-APK
+          path: artifacts/
+
+      - name: Download Windows exe
+        uses: actions/download-artifact@v4
+        with:
+          name: ConectVCam-Windows-exe
+          path: artifacts/
+
       - name: Create GitHub Release
-        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ github.run_number }}
-          name: Virtual Cam v${{ github.run_number }}
+          name: "Virtual Cam v${{ github.run_number }}"
           body: |
-            ## Virtual Cam Build ${{ github.run_number }}
-            System-wide virtual camera injection for rooted Android devices.
-            ### Download
-            - **Debug APK**: app-debug.apk
-            - **Release APK** (unsigned): app-release-unsigned.apk
-            ### Requirements
+            ## Virtual Cam v${{ github.run_number }}
+
+            System-wide virtual camera injection for rooted Android devices + Windows remote control.
+
+            ### Android App (Virtual Cam)
+            - Real-time zoom / scale / pan updates (< 80 ms latency)
+            - Full-quality image injection (ARGB_8888, no downsampling)
+            - Link feature: control from Windows app via USB
+
+            ### Windows App (Conect VCam)
+            - Connects to Android via USB (ADB port forward)
+            - Real-time sliders for zoom, scale, pan
+            - Buttons for rotation (±90°) and mirror toggle
+            - Dark theme GUI, no extra software needed
+
+            ### Android Requirements
             - Android 8.0+ (API 26+)
-            - Rooted Android (Magisk recommended)
-            - Valid access code required on first launch
+            - Root access (Magisk recommended)
+            - Valid access code on first launch
+
+            ### Windows Connection
+            1. Connect phone via USB, enable USB Debugging
+            2. Run: `adb forward tcp:7979 tcp:7979`
+            3. In Virtual Cam app → Enable Link → copy token
+            4. Open `ConectVCam.exe`, paste token, click Connect
           files: |
-            app/build/outputs/apk/debug/app-debug.apk
-            app/build/outputs/apk/release/app-release-unsigned.apk
+            artifacts/app-debug.apk
+            artifacts/app-release-unsigned.apk
+            artifacts/ConectVCam.exe
           draft: false
           prerelease: false
         env:

@@ -19,27 +19,20 @@ import java.io.File
  * CameraInjector — system-wide virtual camera injection.
  *
  * Primary strategy: VcplaxEngine (ShadowHook-based inline hooking via vcplax binary)
- *   - Works on Android 10–14 with Camera2 API
- *   - Injects into cameraserver process at HAL level
- *   - No v4l2loopback kernel module required
- *
  * Fallback strategy: legacy LD_PRELOAD + v4l2loopback
- *   - For older devices / kernels that support it
+ *
+ * Zoom/scale/pan/rotation/mirror changes apply in real-time (within ~80ms).
  */
 class CameraInjector(
     private val context: Context,
     private val mediaPath: String,
     private val isVideo: Boolean,
     private val targetPackage: String?,
-    var rotation: Int = 0,
-    var mirror: Boolean = false,
-    /** Digital zoom: 1.0 = no zoom, 2.0 = 2× (crops to 50% of image center) */
+    @Volatile var rotation: Int = 0,
+    @Volatile var mirror: Boolean = false,
     @Volatile var zoomFactor: Float = 1f,
-    /** Frame fill scale: 1.0 = fill full output frame, 0.5 = image occupies 50% with black bars */
     @Volatile var frameFillScale: Float = 1f,
-    /** Horizontal pan offset in source pixels (positive = shift crop window right) */
     @Volatile var panX: Int = 0,
-    /** Vertical pan offset in source pixels (positive = shift crop window down) */
     @Volatile var panY: Int = 0
 ) {
     companion object {
@@ -51,6 +44,9 @@ class CameraInjector(
 
         const val TARGET_W = 1280
         const val TARGET_H = 720
+
+        // Re-render poll interval for image mode (real-time feel)
+        private const val RENDER_POLL_MS = 80L
 
         init {
             try { System.loadLibrary("vcam_native") }
@@ -70,6 +66,14 @@ class CameraInjector(
     private var injectionJob: Job? = null
     @Volatile private var usingVcplax = false
 
+    // Track last rendered transform state for real-time detection
+    @Volatile private var lastRenderedZoom     = Float.MIN_VALUE
+    @Volatile private var lastRenderedScale    = Float.MIN_VALUE
+    @Volatile private var lastRenderedPanX     = Int.MIN_VALUE
+    @Volatile private var lastRenderedPanY     = Int.MIN_VALUE
+    @Volatile private var lastRenderedRotation = Int.MIN_VALUE
+    @Volatile private var lastRenderedMirror   = false
+
     // ── Public API ──────────────────────────────────────────────────────────
 
     fun start() {
@@ -82,11 +86,9 @@ class CameraInjector(
         injectionJob?.cancel()
 
         if (usingVcplax) {
-            // Stop via VcplaxEngine
             VcplaxEngine.stopInjection()
             usingVcplax = false
         } else {
-            // Legacy cleanup
             cleanupAllWrapProps()
             try { nativeStopInjection() } catch (_: Exception) {}
             RootManager.runCommands(
@@ -103,7 +105,7 @@ class CameraInjector(
     private suspend fun performInjection() {
         Log.d(TAG, "performInjection: isVideo=$isVideo target=$targetPackage")
 
-        // ── PRIMARY: VcplaxEngine (ShadowHook-based, works on Android 10-14) ──
+        // ── PRIMARY: VcplaxEngine ──────────────────────────────────────────────
         try {
             val engineReady = VcplaxEngine.setup(context)
             if (engineReady) {
@@ -112,19 +114,11 @@ class CameraInjector(
                     usingVcplax = true
                     Log.d(TAG, "VcplaxEngine injection active ✓")
 
-                    // Apply rotation/mirror settings
                     if (rotation != 0) VcplaxEngine.setRotation(rotation)
                     if (mirror)        VcplaxEngine.setMirror(true)
 
-                    // Stay alive and propagate rotation/mirror changes
-                    while (running) {
-                        delay(500)
-                        // Check if vcplax is still running
-                        if (!VcplaxEngine.isRunning) {
-                            Log.w(TAG, "vcplax stopped unexpectedly — restarting injection")
-                            VcplaxEngine.startInjection(mediaPath, loop = isVideo)
-                        }
-                    }
+                    // For vcplax path: monitor transform changes and apply via pre-processed source swap
+                    monitorVcplaxTransforms()
                     return
                 }
             }
@@ -137,7 +131,52 @@ class CameraInjector(
         legacyInject()
     }
 
-    // ── Legacy injection (kept as fallback) ────────────────────────────────
+    /**
+     * For the VcplaxEngine path: if zoom/scale/pan are changed, write a pre-processed
+     * version of the media and hot-swap via switchSource so changes apply in real-time.
+     */
+    private suspend fun monitorVcplaxTransforms() {
+        resetLastRendered()
+
+        while (running) {
+            val z = zoomFactor; val s = frameFillScale
+            val px = panX; val py = panY
+            val r = rotation; val m = mirror
+
+            if (!transformsMatch(z, s, px, py, r, m)) {
+                // Apply rotation + mirror via binder (instant)
+                VcplaxEngine.setRotation(r)
+                VcplaxEngine.setMirror(m)
+
+                // For zoom/scale/pan: pre-process and swap source if needed
+                if (z != lastRenderedZoom || s != lastRenderedScale ||
+                    px != lastRenderedPanX || py != lastRenderedPanY) {
+                    val rawBmp = withContext(Dispatchers.IO) {
+                        loadBitmapFullQuality(mediaPath)
+                    }
+                    if (rawBmp != null) {
+                        val transformed = applyTransformsWithValues(rawBmp, r, m, z, s, px, py)
+                        val tempPath = writeTempBitmap(transformed)
+                        if (transformed !== rawBmp) transformed.recycle()
+                        rawBmp.recycle()
+                        if (tempPath != null) {
+                            VcplaxEngine.getProxy()?.switchSource(tempPath, 1)
+                        }
+                    }
+                }
+
+                updateLastRendered(z, s, px, py, r, m)
+            }
+
+            if (!VcplaxEngine.isRunning) {
+                Log.w(TAG, "vcplax stopped unexpectedly — restarting")
+                VcplaxEngine.startInjection(mediaPath, loop = isVideo)
+            }
+            delay(RENDER_POLL_MS)
+        }
+    }
+
+    // ── Legacy injection ────────────────────────────────────────────────────
 
     private suspend fun legacyInject() {
         setupInjectLib()
@@ -227,24 +266,49 @@ class CameraInjector(
     }
 
     private suspend fun streamFramesToV4L2(device: String) {
-        if (isVideo) streamVideo(pushToV4L2 = true) else streamImage(pushToV4L2 = true)
+        if (isVideo) streamVideo() else streamImage()
     }
 
     private suspend fun streamFramesToSharedFile() {
-        if (isVideo) streamVideo(pushToV4L2 = false) else streamImage(pushToV4L2 = false)
+        if (isVideo) streamVideo() else streamImage()
     }
 
-    private suspend fun streamImage(pushToV4L2: Boolean) = withContext(Dispatchers.IO) {
-        val bitmap = loadAndTransformBitmap(mediaPath) ?: run {
+    /**
+     * Real-time image streaming: re-renders whenever any transform parameter changes.
+     * Polls every RENDER_POLL_MS ms — changes apply within ~80ms.
+     */
+    private suspend fun streamImage() = withContext(Dispatchers.IO) {
+        // Load raw (full-quality, unprocessed) bitmap once
+        val rawBitmap = loadBitmapFullQuality(mediaPath)
+        if (rawBitmap == null) {
             Log.e(TAG, "Cannot load image: $mediaPath"); return@withContext
         }
-        val yuyv = bitmapToYUYV(bitmap, TARGET_W, TARGET_H)
-        bitmap.recycle()
-        nativeUpdateYUYVFrame(yuyv, TARGET_W, TARGET_H)
-        while (running) delay(500)
+
+        resetLastRendered()
+
+        try {
+            while (running) {
+                val z  = zoomFactor; val s  = frameFillScale
+                val px = panX;       val py = panY
+                val r  = rotation;   val m  = mirror
+
+                // Re-render only when something changed (real-time, no delay on change)
+                if (!transformsMatch(z, s, px, py, r, m)) {
+                    updateLastRendered(z, s, px, py, r, m)
+                    val transformed = applyTransformsWithValues(rawBitmap, r, m, z, s, px, py)
+                    val yuyv = bitmapToYUYV(transformed, TARGET_W, TARGET_H)
+                    if (transformed !== rawBitmap) transformed.recycle()
+                    nativeUpdateYUYVFrame(yuyv, TARGET_W, TARGET_H)
+                }
+
+                delay(RENDER_POLL_MS)
+            }
+        } finally {
+            rawBitmap.recycle()
+        }
     }
 
-    private suspend fun streamVideo(pushToV4L2: Boolean) = withContext(Dispatchers.IO) {
+    private suspend fun streamVideo() = withContext(Dispatchers.IO) {
         val retriever = MediaMetadataRetriever()
         try {
             retriever.setDataSource(mediaPath)
@@ -273,66 +337,119 @@ class CameraInjector(
         } finally { retriever.release() }
     }
 
-    // ── Bitmap helpers ──────────────────────────────────────────────────────
+    // ── Transform helpers ───────────────────────────────────────────────────
+
+    private fun resetLastRendered() {
+        lastRenderedZoom     = Float.MIN_VALUE
+        lastRenderedScale    = Float.MIN_VALUE
+        lastRenderedPanX     = Int.MIN_VALUE
+        lastRenderedPanY     = Int.MIN_VALUE
+        lastRenderedRotation = Int.MIN_VALUE
+        lastRenderedMirror   = !mirror // force first render
+    }
+
+    private fun transformsMatch(z: Float, s: Float, px: Int, py: Int, r: Int, m: Boolean): Boolean =
+        z == lastRenderedZoom && s == lastRenderedScale &&
+        px == lastRenderedPanX && py == lastRenderedPanY &&
+        r == lastRenderedRotation && m == lastRenderedMirror
+
+    private fun updateLastRendered(z: Float, s: Float, px: Int, py: Int, r: Int, m: Boolean) {
+        lastRenderedZoom     = z;  lastRenderedScale    = s
+        lastRenderedPanX     = px; lastRenderedPanY     = py
+        lastRenderedRotation = r;  lastRenderedMirror   = m
+    }
+
+    // ── Bitmap loaders ──────────────────────────────────────────────────────
+
+    /**
+     * Load bitmap at full quality (ARGB_8888, no downsampling).
+     */
+    private fun loadBitmapFullQuality(path: String): Bitmap? {
+        return try {
+            val opts = BitmapFactory.Options().apply {
+                inPreferredConfig = Bitmap.Config.ARGB_8888
+                inSampleSize = 1
+            }
+            BitmapFactory.decodeFile(path, opts)
+        } catch (e: Exception) {
+            Log.e(TAG, "loadBitmapFullQuality failed: ${e.message}")
+            null
+        }
+    }
+
+    private fun writeTempBitmap(bmp: Bitmap): String? {
+        return try {
+            val dir = File(context.cacheDir, "vcam_tmp").also { it.mkdirs() }
+            val f   = File(dir, "transformed_frame.jpg")
+            java.io.FileOutputStream(f).use { out ->
+                bmp.compress(Bitmap.CompressFormat.JPEG, 100, out)
+            }
+            f.absolutePath
+        } catch (e: Exception) { null }
+    }
+
+    // ── Core transform pipeline ─────────────────────────────────────────────
 
     private fun loadAndTransformBitmap(path: String): Bitmap? {
-        val raw = try { BitmapFactory.decodeFile(path) ?: return null }
-                  catch (e: Exception) { return null }
+        val raw = loadBitmapFullQuality(path) ?: return null
         val result = applyTransforms(raw)
-        // If applyTransforms returned a different instance the original raw has
-        // already been recycled inside the pipeline; if it returned the same
-        // object we must NOT recycle it here because it IS the result.
         return result
     }
 
     /**
-     * Apply all transforms in order through an explicit ownership pipeline:
-     *   1. Rotation + mirror  → `stage1`  (may == src if no-op)
-     *   2. Digital zoom + pan → `stage2`  (may == stage1 if no-op)
-     *   3. Frame scale        → `stage3`  (may == stage2 if no-op)
-     *
-     * Each step recycles the previous stage if it produced a new bitmap.
-     * The original `src` is NEVER recycled here — callers own it and decide
-     * when to recycle (stream loops recycle frame bitmaps after push).
+     * Apply current transforms (reads @Volatile fields).
      */
-    private fun applyTransforms(src: Bitmap): Bitmap {
-        // ── Stage 1: rotation + mirror ───────────────────────────────────────
-        val stage1: Bitmap = if (rotation != 0 || mirror) {
+    private fun applyTransforms(src: Bitmap): Bitmap =
+        applyTransformsWithValues(src, rotation, mirror, zoomFactor, frameFillScale, panX, panY)
+
+    /**
+     * Apply explicit transform values — used for real-time updates where params
+     * are captured before the loop body so they're consistent within one frame.
+     *
+     * Pipeline:
+     *   1. Rotation + mirror  → stage1
+     *   2. Digital zoom + pan → stage2
+     *   3. Frame-fill scale   → stage3  (output = TARGET_W × TARGET_H canvas)
+     */
+    private fun applyTransformsWithValues(
+        src: Bitmap,
+        rot: Int, mir: Boolean,
+        zoom: Float, fillScale: Float,
+        pX: Int, pY: Int
+    ): Bitmap {
+        // Stage 1: rotation + mirror
+        val stage1: Bitmap = if (rot != 0 || mir) {
             val m = Matrix()
-            if (rotation != 0) m.postRotate(rotation.toFloat())
-            if (mirror) m.postScale(-1f, 1f, src.width / 2f, src.height / 2f)
+            if (rot != 0) m.postRotate(rot.toFloat())
+            if (mir) m.postScale(-1f, 1f, src.width / 2f, src.height / 2f)
             Bitmap.createBitmap(src, 0, 0, src.width, src.height, m, true)
-            // src is owned by the caller; do not recycle it here
         } else src
 
-        // ── Stage 2: digital zoom + pan (crop) ──────────────────────────────
-        val zoom = zoomFactor.coerceIn(1f, 5f)
-        val px   = panX
-        val py   = panY
-
-        val stage2: Bitmap = if (zoom != 1f || px != 0 || py != 0) {
-            val cropW = (stage1.width  / zoom).toInt().coerceAtLeast(1)
-            val cropH = (stage1.height / zoom).toInt().coerceAtLeast(1)
-            val centerX = stage1.width  / 2 + px
-            val centerY = stage1.height / 2 + py
+        // Stage 2: digital zoom + pan (crop)
+        val z  = zoom.coerceIn(1f, 5f)
+        val stage2: Bitmap = if (z != 1f || pX != 0 || pY != 0) {
+            val cropW   = (stage1.width  / z).toInt().coerceAtLeast(1)
+            val cropH   = (stage1.height / z).toInt().coerceAtLeast(1)
+            val centerX = stage1.width  / 2 + pX
+            val centerY = stage1.height / 2 + pY
             val left = (centerX - cropW / 2).coerceIn(0, (stage1.width  - cropW).coerceAtLeast(0))
             val top  = (centerY - cropH / 2).coerceIn(0, (stage1.height - cropH).coerceAtLeast(0))
             val cropped = Bitmap.createBitmap(stage1, left, top, cropW, cropH)
-            if (stage1 !== src) stage1.recycle()   // stage1 was a new intermediate → recycle it
+            if (stage1 !== src) stage1.recycle()
             cropped
         } else stage1
 
-        // ── Stage 3: frame-fill scale (letterbox / pillarbox) ───────────────
-        val scale = frameFillScale.coerceIn(0.1f, 2f)
+        // Stage 3: frame-fill scale (letterbox / pillarbox)
+        val scale  = fillScale.coerceIn(0.1f, 2f)
         val stage3: Bitmap = if (scale != 1f) {
             val scaledW = (TARGET_W * scale).toInt().coerceAtLeast(1)
             val scaledH = (TARGET_H * scale).toInt().coerceAtLeast(1)
             val scaled  = Bitmap.createScaledBitmap(stage2, scaledW, scaledH, true)
-            if (stage2 !== src) stage2.recycle()   // stage2 was a new intermediate → recycle it
+            if (stage2 !== src) stage2.recycle()
 
             val canvas = Bitmap.createBitmap(TARGET_W, TARGET_H, Bitmap.Config.ARGB_8888)
             Canvas(canvas).apply {
-                drawARGB(255, 0, 0, 0)             // black background
+                drawARGB(255, 0, 0, 0)
                 drawBitmap(scaled, (TARGET_W - scaledW) / 2f, (TARGET_H - scaledH) / 2f, null)
             }
             scaled.recycle()
@@ -343,8 +460,8 @@ class CameraInjector(
     }
 
     private fun bitmapToYUYV(src: Bitmap, outW: Int, outH: Int): ByteArray {
-        val bmp    = if (src.width != outW || src.height != outH)
-                         Bitmap.createScaledBitmap(src, outW, outH, true) else src
+        val bmp = if (src.width != outW || src.height != outH)
+                      Bitmap.createScaledBitmap(src, outW, outH, true) else src
         val pixels = IntArray(outW * outH)
         bmp.getPixels(pixels, 0, outW, 0, 0, outW, outH)
         if (bmp !== src) bmp.recycle()
