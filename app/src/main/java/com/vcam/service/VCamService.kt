@@ -33,7 +33,7 @@ class VCamService : Service() {
     private val serviceScope = CoroutineScope(Dispatchers.IO + Job())
     private var injector: CameraInjector? = null
 
-    /** Receives rotation / mirror / slot-switch commands from FloatWindowService */
+    /** Receives rotation / mirror / slot-switch / zoom / scale / pan commands from FloatWindowService */
     private val controlReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             when (intent.action) {
@@ -56,6 +56,39 @@ class VCamService : Service() {
                     stopForeground(STOP_FOREGROUND_REMOVE)
                     stopSelf()
                 }
+
+                // ── Zoom ──
+                FloatWindowService.ACTION_ZOOM_IN,
+                FloatWindowService.ACTION_ZOOM_OUT -> {
+                    val zoom = intent.getFloatExtra(FloatWindowService.EXTRA_ZOOM_FACTOR, 1f)
+                    injector?.zoomFactor = zoom
+                }
+
+                // ── Scale ──
+                FloatWindowService.ACTION_SCALE_UP,
+                FloatWindowService.ACTION_SCALE_DOWN -> {
+                    val scale = intent.getFloatExtra(FloatWindowService.EXTRA_SCALE_FACTOR, 1f)
+                    injector?.frameFillScale = scale
+                }
+
+                // ── Pan ──
+                FloatWindowService.ACTION_PAN_UP,
+                FloatWindowService.ACTION_PAN_DOWN,
+                FloatWindowService.ACTION_PAN_LEFT,
+                FloatWindowService.ACTION_PAN_RIGHT -> {
+                    val px = intent.getIntExtra(FloatWindowService.EXTRA_PAN_X, 0)
+                    val py = intent.getIntExtra(FloatWindowService.EXTRA_PAN_Y, 0)
+                    injector?.panX = px
+                    injector?.panY = py
+                }
+
+                // ── Reset all transforms ──
+                FloatWindowService.ACTION_PAN_RESET -> {
+                    injector?.zoomFactor    = 1f
+                    injector?.frameFillScale = 1f
+                    injector?.panX          = 0
+                    injector?.panY          = 0
+                }
             }
         }
     }
@@ -70,6 +103,15 @@ class VCamService : Service() {
             addAction(FloatWindowService.ACTION_MIRROR)
             addAction(FloatWindowService.ACTION_SWITCH_SLOT)
             addAction(FloatWindowService.ACTION_STOP_VCAM)
+            addAction(FloatWindowService.ACTION_ZOOM_IN)
+            addAction(FloatWindowService.ACTION_ZOOM_OUT)
+            addAction(FloatWindowService.ACTION_SCALE_UP)
+            addAction(FloatWindowService.ACTION_SCALE_DOWN)
+            addAction(FloatWindowService.ACTION_PAN_UP)
+            addAction(FloatWindowService.ACTION_PAN_DOWN)
+            addAction(FloatWindowService.ACTION_PAN_LEFT)
+            addAction(FloatWindowService.ACTION_PAN_RIGHT)
+            addAction(FloatWindowService.ACTION_PAN_RESET)
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             registerReceiver(controlReceiver, filter, RECEIVER_NOT_EXPORTED)
@@ -153,14 +195,23 @@ class VCamService : Service() {
                 if (proxy != null && VcplaxEngine.isRunning) {
                     proxy.switchSource(path, if (isVideo) 2 else 1)
                 } else {
-                    // Restart injection with new media
+                    // Restart injection with new media, preserving current transforms
+                    val prevZoom  = injector?.zoomFactor   ?: 1f
+                    val prevScale = injector?.frameFillScale ?: 1f
+                    val prevPanX  = injector?.panX          ?: 0
+                    val prevPanY  = injector?.panY          ?: 0
                     injector?.stop()
                     injector = CameraInjector(
                         context       = this@VCamService,
                         mediaPath     = path,
                         isVideo       = isVideo,
                         targetPackage = null
-                    )
+                    ).also {
+                        it.zoomFactor    = prevZoom
+                        it.frameFillScale = prevScale
+                        it.panX          = prevPanX
+                        it.panY          = prevPanY
+                    }
                     injector?.start()
                 }
                 updateNotification("VCam — Slot $slot Active",

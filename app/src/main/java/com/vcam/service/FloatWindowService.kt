@@ -30,8 +30,36 @@ class FloatWindowService : Service() {
         const val ACTION_STOP_VCAM      = "com.vcam.float.STOP_VCAM"
         const val ACTION_SWITCH_SLOT    = "com.vcam.float.SWITCH_SLOT"
         const val EXTRA_SLOT            = "slot_number"
+
+        // Zoom actions
+        const val ACTION_ZOOM_IN        = "com.vcam.float.ZOOM_IN"
+        const val ACTION_ZOOM_OUT       = "com.vcam.float.ZOOM_OUT"
+        const val EXTRA_ZOOM_FACTOR     = "zoom_factor"
+
+        // Scale actions
+        const val ACTION_SCALE_UP       = "com.vcam.float.SCALE_UP"
+        const val ACTION_SCALE_DOWN     = "com.vcam.float.SCALE_DOWN"
+        const val EXTRA_SCALE_FACTOR    = "scale_factor"
+
+        // Pan actions
+        const val ACTION_PAN_UP         = "com.vcam.float.PAN_UP"
+        const val ACTION_PAN_DOWN       = "com.vcam.float.PAN_DOWN"
+        const val ACTION_PAN_LEFT       = "com.vcam.float.PAN_LEFT"
+        const val ACTION_PAN_RIGHT      = "com.vcam.float.PAN_RIGHT"
+        const val ACTION_PAN_RESET      = "com.vcam.float.PAN_RESET"
+        const val EXTRA_PAN_X           = "pan_x"
+        const val EXTRA_PAN_Y           = "pan_y"
+
         private const val CHANNEL_ID    = "vcam_float_channel"
         private const val NOTIF_ID      = 1002
+
+        private const val ZOOM_STEP     = 0.25f
+        private const val ZOOM_MIN      = 1.0f
+        private const val ZOOM_MAX      = 5.0f
+        private const val SCALE_STEP    = 0.1f
+        private const val SCALE_MIN     = 0.3f
+        private const val SCALE_MAX     = 2.0f
+        private const val PAN_STEP      = 40   // pixels per tap
     }
 
     private var windowManager: WindowManager? = null
@@ -41,6 +69,12 @@ class FloatWindowService : Service() {
     private var isMirrored = false
     private var activeSlot = 1
     private var isExpanded = false
+
+    // Zoom, scale, pan state
+    private var zoomFactor = 1.0f
+    private var scaleFactor = 1.0f
+    private var panX = 0
+    private var panY = 0
 
     private val slotBtnIds = listOf(
         R.id.btn_slot_1, R.id.btn_slot_2, R.id.btn_slot_3,
@@ -138,6 +172,80 @@ class FloatWindowService : Service() {
             stopSelf()
         }
 
+        // ── ZOOM IN ──
+        view.findViewById<android.widget.Button>(R.id.btn_float_zoom_in)?.setOnClickListener {
+            zoomFactor = (zoomFactor + ZOOM_STEP).coerceAtMost(ZOOM_MAX)
+            updateZoomLabel(view)
+            sendBroadcast(Intent(ACTION_ZOOM_IN).putExtra(EXTRA_ZOOM_FACTOR, zoomFactor))
+            animateBounce(it)
+        }
+
+        // ── ZOOM OUT ──
+        view.findViewById<android.widget.Button>(R.id.btn_float_zoom_out)?.setOnClickListener {
+            zoomFactor = (zoomFactor - ZOOM_STEP).coerceAtLeast(ZOOM_MIN)
+            updateZoomLabel(view)
+            sendBroadcast(Intent(ACTION_ZOOM_OUT).putExtra(EXTRA_ZOOM_FACTOR, zoomFactor))
+            animateBounce(it)
+        }
+
+        // ── SCALE UP ──
+        view.findViewById<android.widget.Button>(R.id.btn_float_scale_up)?.setOnClickListener {
+            scaleFactor = (scaleFactor + SCALE_STEP).coerceAtMost(SCALE_MAX)
+            updateScaleLabel(view)
+            sendBroadcast(Intent(ACTION_SCALE_UP).putExtra(EXTRA_SCALE_FACTOR, scaleFactor))
+            animateBounce(it)
+        }
+
+        // ── SCALE DOWN ──
+        view.findViewById<android.widget.Button>(R.id.btn_float_scale_down)?.setOnClickListener {
+            scaleFactor = (scaleFactor - SCALE_STEP).coerceAtLeast(SCALE_MIN)
+            updateScaleLabel(view)
+            sendBroadcast(Intent(ACTION_SCALE_DOWN).putExtra(EXTRA_SCALE_FACTOR, scaleFactor))
+            animateBounce(it)
+        }
+
+        // ── PAN UP ──
+        view.findViewById<android.widget.Button>(R.id.btn_float_pan_up)?.setOnClickListener {
+            panY -= PAN_STEP
+            sendBroadcast(Intent(ACTION_PAN_UP).putExtra(EXTRA_PAN_X, panX).putExtra(EXTRA_PAN_Y, panY))
+            animateBounce(it)
+        }
+
+        // ── PAN DOWN ──
+        view.findViewById<android.widget.Button>(R.id.btn_float_pan_down)?.setOnClickListener {
+            panY += PAN_STEP
+            sendBroadcast(Intent(ACTION_PAN_DOWN).putExtra(EXTRA_PAN_X, panX).putExtra(EXTRA_PAN_Y, panY))
+            animateBounce(it)
+        }
+
+        // ── PAN LEFT ──
+        view.findViewById<android.widget.Button>(R.id.btn_float_pan_left)?.setOnClickListener {
+            panX -= PAN_STEP
+            sendBroadcast(Intent(ACTION_PAN_LEFT).putExtra(EXTRA_PAN_X, panX).putExtra(EXTRA_PAN_Y, panY))
+            animateBounce(it)
+        }
+
+        // ── PAN RIGHT ──
+        view.findViewById<android.widget.Button>(R.id.btn_float_pan_right)?.setOnClickListener {
+            panX += PAN_STEP
+            sendBroadcast(Intent(ACTION_PAN_RIGHT).putExtra(EXTRA_PAN_X, panX).putExtra(EXTRA_PAN_Y, panY))
+            animateBounce(it)
+        }
+
+        // ── PAN RESET ──
+        view.findViewById<android.widget.Button>(R.id.btn_float_pan_reset)?.setOnClickListener {
+            panX = 0; panY = 0
+            zoomFactor = 1.0f; scaleFactor = 1.0f
+            updateZoomLabel(view)
+            updateScaleLabel(view)
+            sendBroadcast(Intent(ACTION_PAN_RESET)
+                .putExtra(EXTRA_PAN_X, 0)
+                .putExtra(EXTRA_PAN_Y, 0)
+                .putExtra(EXTRA_ZOOM_FACTOR, 1.0f)
+                .putExtra(EXTRA_SCALE_FACTOR, 1.0f))
+            animateBounce(it)
+        }
+
         // Window params
         val lp = WindowManager.LayoutParams(
             WindowManager.LayoutParams.WRAP_CONTENT,
@@ -163,6 +271,18 @@ class FloatWindowService : Service() {
 
         // Pulse animation on the FAB to attract attention
         pulseFab(fabMain)
+    }
+
+    // ── Label helpers ─────────────────────────────────────────────────
+
+    private fun updateZoomLabel(view: View) {
+        view.findViewById<TextView>(R.id.tv_float_zoom_label)?.text =
+            String.format("%.1f×", zoomFactor)
+    }
+
+    private fun updateScaleLabel(view: View) {
+        view.findViewById<TextView>(R.id.tv_float_scale_label)?.text =
+            "${(scaleFactor * 100).toInt()}%"
     }
 
     // ── Expand / Collapse animations ──────────────────────────────────

@@ -32,7 +32,15 @@ class CameraInjector(
     private val isVideo: Boolean,
     private val targetPackage: String?,
     var rotation: Int = 0,
-    var mirror: Boolean = false
+    var mirror: Boolean = false,
+    /** Digital zoom: 1.0 = no zoom, 2.0 = 2× (crops to 50% of image center) */
+    @Volatile var zoomFactor: Float = 1f,
+    /** Frame fill scale: 1.0 = fill full output frame, 0.5 = image occupies 50% with black bars */
+    @Volatile var frameFillScale: Float = 1f,
+    /** Horizontal pan offset in source pixels (positive = shift crop window right) */
+    @Volatile var panX: Int = 0,
+    /** Vertical pan offset in source pixels (positive = shift crop window down) */
+    @Volatile var panY: Int = 0
 ) {
     companion object {
         private const val TAG      = "CameraInjector"
@@ -273,12 +281,65 @@ class CameraInjector(
         return applyTransforms(raw)
     }
 
+    /**
+     * Apply all transforms in order:
+     *   1. Rotation + mirror (existing)
+     *   2. Digital zoom  — crops into the image center by zoomFactor
+     *   3. Pan           — shifts the crop window by (panX, panY) source pixels
+     *   4. Frame scale   — letterboxes/pillarboxes the result into the output frame
+     *
+     * Zoom and pan are applied by computing a crop rectangle on the
+     * (possibly rotated/mirrored) bitmap, then scaling the crop to TARGET_W×TARGET_H.
+     * Frame scale further shrinks that result and composites it onto a black canvas.
+     */
     private fun applyTransforms(src: Bitmap): Bitmap {
-        if (rotation == 0 && !mirror) return src
-        val matrix = Matrix()
-        if (rotation != 0) matrix.postRotate(rotation.toFloat())
-        if (mirror) matrix.postScale(-1f, 1f, src.width / 2f, src.height / 2f)
-        return Bitmap.createBitmap(src, 0, 0, src.width, src.height, matrix, true)
+        // 1. Rotation + mirror
+        val base: Bitmap = if (rotation != 0 || mirror) {
+            val m = Matrix()
+            if (rotation != 0) m.postRotate(rotation.toFloat())
+            if (mirror) m.postScale(-1f, 1f, src.width / 2f, src.height / 2f)
+            Bitmap.createBitmap(src, 0, 0, src.width, src.height, m, true)
+        } else src
+
+        // 2 & 3. Zoom + pan crop
+        val zoom = zoomFactor.coerceIn(1f, 5f)
+        val px   = panX
+        val py   = panY
+
+        val zoomed: Bitmap = if (zoom != 1f || px != 0 || py != 0) {
+            val cropW = (base.width  / zoom).toInt().coerceAtLeast(1)
+            val cropH = (base.height / zoom).toInt().coerceAtLeast(1)
+
+            // Center of crop, offset by pan
+            val centerX = base.width  / 2 + px
+            val centerY = base.height / 2 + py
+            val left = (centerX - cropW / 2).coerceIn(0, (base.width  - cropW).coerceAtLeast(0))
+            val top  = (centerY - cropH / 2).coerceIn(0, (base.height - cropH).coerceAtLeast(0))
+
+            val cropped = Bitmap.createBitmap(base, left, top, cropW, cropH)
+            if (base !== src) base.recycle()
+            cropped
+        } else base
+
+        // 4. Frame scale (letterbox / pillarbox)
+        val scale = frameFillScale.coerceIn(0.1f, 2f)
+        return if (scale != 1f) {
+            val scaledW = (TARGET_W * scale).toInt().coerceAtLeast(1)
+            val scaledH = (TARGET_H * scale).toInt().coerceAtLeast(1)
+            val scaled  = Bitmap.createScaledBitmap(zoomed, scaledW, scaledH, true)
+            if (zoomed !== src && zoomed !== base) zoomed.recycle()
+
+            val canvas = Bitmap.createBitmap(TARGET_W, TARGET_H, Bitmap.Config.ARGB_8888)
+            val c = Canvas(canvas)
+            c.drawARGB(255, 0, 0, 0)  // black background
+            val dx = (TARGET_W - scaledW) / 2f
+            val dy = (TARGET_H - scaledH) / 2f
+            c.drawBitmap(scaled, dx, dy, null)
+            scaled.recycle()
+            canvas
+        } else {
+            zoomed
+        }
     }
 
     private fun bitmapToYUYV(src: Bitmap, outW: Int, outH: Int): ByteArray {
