@@ -134,36 +134,34 @@ class CameraInjector(
     /**
      * For the VcplaxEngine path: monitor transform changes and apply in real-time.
      *
-     * - Rotation/mirror: applied immediately via Binder (VcplaxEngine.setRotation/setMirror)
-     * - Zoom/scale/pan (images only): pre-processed bitmap written to temp file,
-     *   switchSource() swaps the source.
+     * For images: ANY transform change (rotation, mirror, zoom, scale, pan) triggers
+     * a full re-render of the bitmap → temp file → switchSource. This guarantees
+     * every button press is reflected immediately without needing to change the image.
+     *
+     * For video: rotation/mirror applied via Binder; spatial transforms skipped
+     * (vcplax handles the video stream directly).
      *
      * IMPORTANT: Never restarts injection from here — that would break the running proxy.
-     * Only call switchSource when transforms are genuinely non-default.
      */
     private suspend fun monitorVcplaxTransforms() = withContext(Dispatchers.IO) {
         resetLastRendered()
+
+        // Force an initial render so the first frame is correct
+        var firstRender = true
 
         while (running) {
             val z  = zoomFactor;  val s  = frameFillScale
             val px = panX;        val py = panY
             val r  = rotation;    val m  = mirror
 
-            if (!transformsMatch(z, s, px, py, r, m)) {
-                // 1. Rotation + mirror: always apply via Binder (zero-copy, instant)
-                VcplaxEngine.setRotation(r)
-                VcplaxEngine.setMirror(m)
+            if (firstRender || !transformsMatch(z, s, px, py, r, m)) {
+                firstRender = false
 
-                // 2. Zoom/scale/pan for images: pre-process + switchSource
-                //    Only when at least one spatial transform is non-default.
-                //    For video, vcplax handles the stream directly — skip.
-                if (!isVideo &&
-                    (z != lastRenderedZoom || s != lastRenderedScale ||
-                     px != lastRenderedPanX || py != lastRenderedPanY)
-                ) {
-                    val needsSpatial = (z != 1f || s != 1f || px != 0 || py != 0)
-                    val sourcePath: String? = if (needsSpatial) {
-                        // Load → transform → write temp JPEG → switchSource
+                if (!isVideo) {
+                    // For images: always re-render via switchSource on ANY transform change.
+                    // This ensures rotation, mirror, zoom, scale, and pan all apply instantly.
+                    val needsTransform = (r != 0 || m || z != 1f || s != 1f || px != 0 || py != 0)
+                    val sourcePath: String? = if (needsTransform) {
                         val rawBmp = loadBitmapForInjection(mediaPath)
                         if (rawBmp != null) {
                             val transformed = applyTransformsWithValues(rawBmp, r, m, z, s, px, py)
@@ -173,7 +171,6 @@ class CameraInjector(
                             tp
                         } else null
                     } else {
-                        // Transforms back to default → restore original source
                         mediaPath
                     }
 
@@ -184,6 +181,10 @@ class CameraInjector(
                             Log.w(TAG, "switchSource failed: ${e.message}")
                         }
                     }
+                } else {
+                    // For video: apply rotation/mirror via Binder
+                    VcplaxEngine.setRotation(r)
+                    VcplaxEngine.setMirror(m)
                 }
 
                 updateLastRendered(z, s, px, py, r, m)
@@ -304,6 +305,7 @@ class CameraInjector(
         }
 
         resetLastRendered()
+        var firstRender = true
 
         try {
             while (running) {
@@ -311,7 +313,8 @@ class CameraInjector(
                 val px = panX;       val py = panY
                 val r  = rotation;   val m  = mirror
 
-                if (!transformsMatch(z, s, px, py, r, m)) {
+                if (firstRender || !transformsMatch(z, s, px, py, r, m)) {
+                    firstRender = false
                     updateLastRendered(z, s, px, py, r, m)
                     val transformed = applyTransformsWithValues(rawBitmap, r, m, z, s, px, py)
                     val yuyv = bitmapToYUYV(transformed, TARGET_W, TARGET_H)
@@ -420,11 +423,24 @@ class CameraInjector(
 
     private fun writeTempBitmap(bmp: Bitmap): String? {
         return try {
+            // Ensure the bitmap is opaque (no alpha) — JPEG doesn't support alpha,
+            // and transparent pixels would render as white. Convert to RGB_565
+            // which is always opaque and matches the camera frame format.
+            val opaque = if (bmp.hasAlpha()) {
+                val out = Bitmap.createBitmap(bmp.width, bmp.height, Bitmap.Config.RGB_565)
+                Canvas(out).apply {
+                    drawARGB(255, 0, 0, 0)
+                    drawBitmap(bmp, 0f, 0f, null)
+                }
+                out
+            } else bmp
+
             val dir = File(context.cacheDir, "vcam_tmp").also { it.mkdirs() }
             val f   = File(dir, "transformed_frame.jpg")
             java.io.FileOutputStream(f).use { out ->
-                bmp.compress(Bitmap.CompressFormat.JPEG, 100, out)
+                opaque.compress(Bitmap.CompressFormat.JPEG, 95, out)
             }
+            if (opaque !== bmp) opaque.recycle()
             f.absolutePath
         } catch (e: Exception) {
             Log.e(TAG, "writeTempBitmap failed: ${e.message}")
@@ -468,32 +484,37 @@ class CameraInjector(
             Bitmap.createBitmap(src, 0, 0, src.width, src.height, m, true)
         } else src
 
-        // Stage 2: digital zoom + pan (crop)
+        // Stage 2: digital zoom (crop only — pan is handled in stage 3)
         val z  = zoom.coerceIn(1f, 5f)
-        val stage2: Bitmap = if (z != 1f || pX != 0 || pY != 0) {
+        val stage2: Bitmap = if (z != 1f) {
             val cropW   = (stage1.width  / z).toInt().coerceAtLeast(1)
             val cropH   = (stage1.height / z).toInt().coerceAtLeast(1)
-            val centerX = stage1.width  / 2 + pX
-            val centerY = stage1.height / 2 + pY
-            val left = (centerX - cropW / 2).coerceIn(0, (stage1.width  - cropW).coerceAtLeast(0))
-            val top  = (centerY - cropH / 2).coerceIn(0, (stage1.height - cropH).coerceAtLeast(0))
+            val left = ((stage1.width  - cropW) / 2).coerceIn(0, (stage1.width  - cropW).coerceAtLeast(0))
+            val top  = ((stage1.height - cropH) / 2).coerceIn(0, (stage1.height - cropH).coerceAtLeast(0))
             val cropped = Bitmap.createBitmap(stage1, left, top, cropW, cropH)
             if (stage1 !== src) stage1.recycle()
             cropped
         } else stage1
 
-        // Stage 3: frame-fill scale (letterbox / pillarbox)
+        // Stage 3: frame-fill scale + free pan (letterbox / pillarbox)
+        // The image is scaled and drawn on a black canvas at a position offset by pan.
+        // Pan is NOT clamped — the image can move freely beyond the camera frame,
+        // and areas outside show as black (empty space is fine).
         val scale  = fillScale.coerceIn(0.1f, 2f)
-        val stage3: Bitmap = if (scale != 1f) {
+        val stage3: Bitmap = if (scale != 1f || pX != 0 || pY != 0) {
             val scaledW = (TARGET_W * scale).toInt().coerceAtLeast(1)
             val scaledH = (TARGET_H * scale).toInt().coerceAtLeast(1)
             val scaled  = Bitmap.createScaledBitmap(stage2, scaledW, scaledH, true)
             if (stage2 !== src) stage2.recycle()
 
-            val canvas = Bitmap.createBitmap(TARGET_W, TARGET_H, Bitmap.Config.ARGB_8888)
+            // Base center position + pan offset (free movement, not clamped)
+            val drawX = (TARGET_W  - scaledW) / 2f + pX
+            val drawY = (TARGET_H  - scaledH) / 2f + pY
+
+            val canvas = Bitmap.createBitmap(TARGET_W, TARGET_H, Bitmap.Config.RGB_565)
             Canvas(canvas).apply {
                 drawARGB(255, 0, 0, 0)
-                drawBitmap(scaled, (TARGET_W - scaledW) / 2f, (TARGET_H - scaledH) / 2f, null)
+                drawBitmap(scaled, drawX, drawY, null)
             }
             scaled.recycle()
             canvas

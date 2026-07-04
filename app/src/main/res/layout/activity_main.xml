@@ -62,129 +62,785 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <!-- Section title: Media Slots -->
+            <!-- Section: Images -->
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/slots_title"
-                android:textColor="#888888"
-                android:textSize="11sp"
-                android:textAllCaps="true"
-                android:letterSpacing="0.1"
+                android:text="📷  الصور"
+                android:textColor="#FFFFFF"
+                android:textSize="15sp"
+                android:textStyle="bold"
                 android:layout_marginBottom="10dp"/>
 
-            <!-- SLOT 1 - Image -->
-            <androidx.cardview.widget.CardView
-                android:id="@+id/card_slot_1"
+            <!-- 2x2 grid of image squares -->
+            <androidx.gridlayout.widget.GridLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
-                app:cardCornerRadius="12dp"
-                app:cardBackgroundColor="#111111"
-                app:cardElevation="0dp">
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="72dp"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:paddingStart="14dp"
-                    android:paddingEnd="8dp">
-                    <TextView
-                        android:layout_width="32dp"
-                        android:layout_height="32dp"
-                        android:text="1"
-                        android:textColor="#FFFFFF"
-                        android:textSize="15sp"
-                        android:textStyle="bold"
-                        android:gravity="center"
-                        android:background="@drawable/bg_slot_badge"
-                        android:layout_marginEnd="12dp"/>
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/slot_image_1"
-                            android:textColor="#FFFFFF"
-                            android:textSize="14sp"
-                            android:textStyle="bold"/>
-                        <TextView
-                            android:id="@+id/tv_slot_1_status"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/slot_empty"
-                            android:textColor="#555555"
-                            android:textSize="12sp"/>
-                    </LinearLayout>
-                    <ImageView android:id="@+id/iv_slot_1" android:layout_width="52dp" android:layout_height="52dp" android:scaleType="centerCrop" android:background="#1E1E1E" android:visibility="gone" android:contentDescription="Slot 1 thumbnail" android:layout_marginEnd="8dp"/>
-                    <com.google.android.material.button.MaterialButton android:id="@+id/btn_pick_slot_1" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/pick" android:textSize="12sp" android:textColor="#4F8EF7" style="@style/Widget.MaterialComponents.Button.OutlinedButton" app:strokeColor="#4F8EF7" app:cornerRadius="8dp" android:paddingStart="12dp" android:paddingEnd="12dp"/>
-                    <ImageButton android:id="@+id/btn_rotate_slot_1" android:layout_width="36dp" android:layout_height="36dp" android:src="@drawable/ic_rotate_cw" android:background="@android:color/transparent" android:padding="6dp" android:tint="#4F8EF7" android:visibility="gone" android:contentDescription="Rotate slot 1"/>
-                </LinearLayout>
-            </androidx.cardview.widget.CardView>
+                app:columnCount="2"
+                app:rowCount="2"
+                app:orientation="horizontal">
 
-            <!-- SLOT 2 - Image -->
-            <androidx.cardview.widget.CardView android:id="@+id/card_slot_2" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="8dp" app:cardCornerRadius="12dp" app:cardBackgroundColor="#111111" app:cardElevation="0dp">
-                <LinearLayout android:layout_width="match_parent" android:layout_height="72dp" android:orientation="horizontal" android:gravity="center_vertical" android:paddingStart="14dp" android:paddingEnd="8dp">
-                    <TextView android:layout_width="32dp" android:layout_height="32dp" android:text="2" android:textColor="#FFFFFF" android:textSize="15sp" android:textStyle="bold" android:gravity="center" android:background="@drawable/bg_slot_badge" android:layout_marginEnd="12dp"/>
-                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical">
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/slot_image_2" android:textColor="#FFFFFF" android:textSize="14sp" android:textStyle="bold"/>
-                        <TextView android:id="@+id/tv_slot_2_status" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/slot_empty" android:textColor="#555555" android:textSize="12sp"/>
-                    </LinearLayout>
-                    <ImageView android:id="@+id/iv_slot_2" android:layout_width="52dp" android:layout_height="52dp" android:scaleType="centerCrop" android:background="#1E1E1E" android:visibility="gone" android:contentDescription="Slot 2" android:layout_marginEnd="8dp"/>
-                    <com.google.android.material.button.MaterialButton android:id="@+id/btn_pick_slot_2" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/pick" android:textSize="12sp" android:textColor="#4F8EF7" style="@style/Widget.MaterialComponents.Button.OutlinedButton" app:strokeColor="#4F8EF7" app:cornerRadius="8dp" android:paddingStart="12dp" android:paddingEnd="12dp"/>
-                    <ImageButton android:id="@+id/btn_rotate_slot_2" android:layout_width="36dp" android:layout_height="36dp" android:src="@drawable/ic_rotate_cw" android:background="@android:color/transparent" android:padding="6dp" android:tint="#4F8EF7" android:visibility="gone" android:contentDescription="Rotate slot 2"/>
-                </LinearLayout>
-            </androidx.cardview.widget.CardView>
+                <!-- SLOT 1 -->
+                <FrameLayout
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    app:layout_columnWeight="1"
+                    app:layout_rowWeight="1"
+                    app:layout_gravity="fill"
+                    android:layout_margin="6dp">
+                    <androidx.cardview.widget.CardView
+                        android:id="@+id/card_slot_1"
+                        android:layout_width="match_parent"
+                        android:layout_height="160dp"
+                        app:cardCornerRadius="14dp"
+                        app:cardBackgroundColor="#111111"
+                        app:cardElevation="0dp"
+                        app:cardPreventCornerOverlap="false">
+                        <FrameLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent">
+                            <ImageView
+                                android:id="@+id/iv_slot_1"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:scaleType="centerCrop"
+                                android:background="#1E1E1E"
+                                android:visibility="gone"
+                                android:contentDescription="Slot 1"/>
+                            <LinearLayout
+                                android:id="@+id/placeholder_slot_1"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:orientation="vertical"
+                                android:gravity="center"
+                                android:background="@drawable/bg_slot_placeholder">
+                                <ImageView
+                                    android:layout_width="32dp"
+                                    android:layout_height="32dp"
+                                    android:src="@drawable/ic_image"
+                                    android:tint="#555555"
+                                    android:contentDescription="Add"/>
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="صورة 1"
+                                    android:textColor="#666666"
+                                    android:textSize="11sp"
+                                    android:layout_marginTop="6dp"/>
+                            </LinearLayout>
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="1"
+                                android:textColor="#FFFFFF"
+                                android:textSize="11sp"
+                                android:textStyle="bold"
+                                android:background="@drawable/bg_slot_badge"
+                                android:layout_gravity="top|start"
+                                android:layout_margin="6dp"
+                                android:paddingStart="6dp"
+                                android:paddingEnd="6dp"
+                                android:paddingTop="2dp"
+                                android:paddingBottom="2dp"/>
+                            <ImageButton
+                                android:id="@+id/btn_delete_slot_1"
+                                android:layout_width="28dp"
+                                android:layout_height="28dp"
+                                android:src="@drawable/ic_close"
+                                android:background="#CC000000"
+                                android:tint="#EF4444"
+                                android:padding="6dp"
+                                android:visibility="gone"
+                                android:layout_gravity="top|end"
+                                android:layout_margin="6dp"
+                                android:contentDescription="Delete slot 1"/>
+                            <ImageButton
+                                android:id="@+id/btn_rotate_slot_1"
+                                android:layout_width="28dp"
+                                android:layout_height="28dp"
+                                android:src="@drawable/ic_rotate_cw"
+                                android:background="#CC000000"
+                                android:tint="#4F8EF7"
+                                android:padding="6dp"
+                                android:visibility="gone"
+                                android:layout_gravity="bottom|start"
+                                android:layout_margin="6dp"
+                                android:contentDescription="Rotate slot 1"/>
+                        </FrameLayout>
+                    </androidx.cardview.widget.CardView>
+                    <View
+                        android:id="@+id/btn_pick_slot_1"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:background="?android:attr/selectableItemBackground"/>
+                </FrameLayout>
 
-            <!-- SLOT 3 - Image -->
-            <androidx.cardview.widget.CardView android:id="@+id/card_slot_3" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="8dp" app:cardCornerRadius="12dp" app:cardBackgroundColor="#111111" app:cardElevation="0dp">
-                <LinearLayout android:layout_width="match_parent" android:layout_height="72dp" android:orientation="horizontal" android:gravity="center_vertical" android:paddingStart="14dp" android:paddingEnd="8dp">
-                    <TextView android:layout_width="32dp" android:layout_height="32dp" android:text="3" android:textColor="#FFFFFF" android:textSize="15sp" android:textStyle="bold" android:gravity="center" android:background="@drawable/bg_slot_badge" android:layout_marginEnd="12dp"/>
-                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical">
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/slot_image_3" android:textColor="#FFFFFF" android:textSize="14sp" android:textStyle="bold"/>
-                        <TextView android:id="@+id/tv_slot_3_status" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/slot_empty" android:textColor="#555555" android:textSize="12sp"/>
-                    </LinearLayout>
-                    <ImageView android:id="@+id/iv_slot_3" android:layout_width="52dp" android:layout_height="52dp" android:scaleType="centerCrop" android:background="#1E1E1E" android:visibility="gone" android:contentDescription="Slot 3" android:layout_marginEnd="8dp"/>
-                    <com.google.android.material.button.MaterialButton android:id="@+id/btn_pick_slot_3" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/pick" android:textSize="12sp" android:textColor="#4F8EF7" style="@style/Widget.MaterialComponents.Button.OutlinedButton" app:strokeColor="#4F8EF7" app:cornerRadius="8dp" android:paddingStart="12dp" android:paddingEnd="12dp"/>
-                    <ImageButton android:id="@+id/btn_rotate_slot_3" android:layout_width="36dp" android:layout_height="36dp" android:src="@drawable/ic_rotate_cw" android:background="@android:color/transparent" android:padding="6dp" android:tint="#4F8EF7" android:visibility="gone" android:contentDescription="Rotate slot 3"/>
-                </LinearLayout>
-            </androidx.cardview.widget.CardView>
+                <!-- SLOT 2 -->
+                <FrameLayout
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    app:layout_columnWeight="1"
+                    app:layout_rowWeight="1"
+                    app:layout_gravity="fill"
+                    android:layout_margin="6dp">
+                    <androidx.cardview.widget.CardView
+                        android:id="@+id/card_slot_2"
+                        android:layout_width="match_parent"
+                        android:layout_height="160dp"
+                        app:cardCornerRadius="14dp"
+                        app:cardBackgroundColor="#111111"
+                        app:cardElevation="0dp"
+                        app:cardPreventCornerOverlap="false">
+                        <FrameLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent">
+                            <ImageView
+                                android:id="@+id/iv_slot_2"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:scaleType="centerCrop"
+                                android:background="#1E1E1E"
+                                android:visibility="gone"
+                                android:contentDescription="Slot 2"/>
+                            <LinearLayout
+                                android:id="@+id/placeholder_slot_2"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:orientation="vertical"
+                                android:gravity="center"
+                                android:background="@drawable/bg_slot_placeholder">
+                                <ImageView
+                                    android:layout_width="32dp"
+                                    android:layout_height="32dp"
+                                    android:src="@drawable/ic_image"
+                                    android:tint="#555555"
+                                    android:contentDescription="Add"/>
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="صورة 2"
+                                    android:textColor="#666666"
+                                    android:textSize="11sp"
+                                    android:layout_marginTop="6dp"/>
+                            </LinearLayout>
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="2"
+                                android:textColor="#FFFFFF"
+                                android:textSize="11sp"
+                                android:textStyle="bold"
+                                android:background="@drawable/bg_slot_badge"
+                                android:layout_gravity="top|start"
+                                android:layout_margin="6dp"
+                                android:paddingStart="6dp"
+                                android:paddingEnd="6dp"
+                                android:paddingTop="2dp"
+                                android:paddingBottom="2dp"/>
+                            <ImageButton
+                                android:id="@+id/btn_delete_slot_2"
+                                android:layout_width="28dp"
+                                android:layout_height="28dp"
+                                android:src="@drawable/ic_close"
+                                android:background="#CC000000"
+                                android:tint="#EF4444"
+                                android:padding="6dp"
+                                android:visibility="gone"
+                                android:layout_gravity="top|end"
+                                android:layout_margin="6dp"
+                                android:contentDescription="Delete slot 2"/>
+                            <ImageButton
+                                android:id="@+id/btn_rotate_slot_2"
+                                android:layout_width="28dp"
+                                android:layout_height="28dp"
+                                android:src="@drawable/ic_rotate_cw"
+                                android:background="#CC000000"
+                                android:tint="#4F8EF7"
+                                android:padding="6dp"
+                                android:visibility="gone"
+                                android:layout_gravity="bottom|start"
+                                android:layout_margin="6dp"
+                                android:contentDescription="Rotate slot 2"/>
+                        </FrameLayout>
+                    </androidx.cardview.widget.CardView>
+                    <View
+                        android:id="@+id/btn_pick_slot_2"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:background="?android:attr/selectableItemBackground"/>
+                </FrameLayout>
 
-            <!-- SLOT 4 - Image -->
-            <androidx.cardview.widget.CardView android:id="@+id/card_slot_4" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="8dp" app:cardCornerRadius="12dp" app:cardBackgroundColor="#111111" app:cardElevation="0dp">
-                <LinearLayout android:layout_width="match_parent" android:layout_height="72dp" android:orientation="horizontal" android:gravity="center_vertical" android:paddingStart="14dp" android:paddingEnd="8dp">
-                    <TextView android:layout_width="32dp" android:layout_height="32dp" android:text="4" android:textColor="#FFFFFF" android:textSize="15sp" android:textStyle="bold" android:gravity="center" android:background="@drawable/bg_slot_badge" android:layout_marginEnd="12dp"/>
-                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical">
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/slot_image_4" android:textColor="#FFFFFF" android:textSize="14sp" android:textStyle="bold"/>
-                        <TextView android:id="@+id/tv_slot_4_status" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/slot_empty" android:textColor="#555555" android:textSize="12sp"/>
-                    </LinearLayout>
-                    <ImageView android:id="@+id/iv_slot_4" android:layout_width="52dp" android:layout_height="52dp" android:scaleType="centerCrop" android:background="#1E1E1E" android:visibility="gone" android:contentDescription="Slot 4" android:layout_marginEnd="8dp"/>
-                    <com.google.android.material.button.MaterialButton android:id="@+id/btn_pick_slot_4" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/pick" android:textSize="12sp" android:textColor="#4F8EF7" style="@style/Widget.MaterialComponents.Button.OutlinedButton" app:strokeColor="#4F8EF7" app:cornerRadius="8dp" android:paddingStart="12dp" android:paddingEnd="12dp"/>
-                    <ImageButton android:id="@+id/btn_rotate_slot_4" android:layout_width="36dp" android:layout_height="36dp" android:src="@drawable/ic_rotate_cw" android:background="@android:color/transparent" android:padding="6dp" android:tint="#4F8EF7" android:visibility="gone" android:contentDescription="Rotate slot 4"/>
-                </LinearLayout>
-            </androidx.cardview.widget.CardView>
+                <!-- SLOT 3 -->
+                <FrameLayout
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    app:layout_columnWeight="1"
+                    app:layout_rowWeight="1"
+                    app:layout_gravity="fill"
+                    android:layout_margin="6dp">
+                    <androidx.cardview.widget.CardView
+                        android:id="@+id/card_slot_3"
+                        android:layout_width="match_parent"
+                        android:layout_height="160dp"
+                        app:cardCornerRadius="14dp"
+                        app:cardBackgroundColor="#111111"
+                        app:cardElevation="0dp"
+                        app:cardPreventCornerOverlap="false">
+                        <FrameLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent">
+                            <ImageView
+                                android:id="@+id/iv_slot_3"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:scaleType="centerCrop"
+                                android:background="#1E1E1E"
+                                android:visibility="gone"
+                                android:contentDescription="Slot 3"/>
+                            <LinearLayout
+                                android:id="@+id/placeholder_slot_3"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:orientation="vertical"
+                                android:gravity="center"
+                                android:background="@drawable/bg_slot_placeholder">
+                                <ImageView
+                                    android:layout_width="32dp"
+                                    android:layout_height="32dp"
+                                    android:src="@drawable/ic_image"
+                                    android:tint="#555555"
+                                    android:contentDescription="Add"/>
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="صورة 3"
+                                    android:textColor="#666666"
+                                    android:textSize="11sp"
+                                    android:layout_marginTop="6dp"/>
+                            </LinearLayout>
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="3"
+                                android:textColor="#FFFFFF"
+                                android:textSize="11sp"
+                                android:textStyle="bold"
+                                android:background="@drawable/bg_slot_badge"
+                                android:layout_gravity="top|start"
+                                android:layout_margin="6dp"
+                                android:paddingStart="6dp"
+                                android:paddingEnd="6dp"
+                                android:paddingTop="2dp"
+                                android:paddingBottom="2dp"/>
+                            <ImageButton
+                                android:id="@+id/btn_delete_slot_3"
+                                android:layout_width="28dp"
+                                android:layout_height="28dp"
+                                android:src="@drawable/ic_close"
+                                android:background="#CC000000"
+                                android:tint="#EF4444"
+                                android:padding="6dp"
+                                android:visibility="gone"
+                                android:layout_gravity="top|end"
+                                android:layout_margin="6dp"
+                                android:contentDescription="Delete slot 3"/>
+                            <ImageButton
+                                android:id="@+id/btn_rotate_slot_3"
+                                android:layout_width="28dp"
+                                android:layout_height="28dp"
+                                android:src="@drawable/ic_rotate_cw"
+                                android:background="#CC000000"
+                                android:tint="#4F8EF7"
+                                android:padding="6dp"
+                                android:visibility="gone"
+                                android:layout_gravity="bottom|start"
+                                android:layout_margin="6dp"
+                                android:contentDescription="Rotate slot 3"/>
+                        </FrameLayout>
+                    </androidx.cardview.widget.CardView>
+                    <View
+                        android:id="@+id/btn_pick_slot_3"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:background="?android:attr/selectableItemBackground"/>
+                </FrameLayout>
 
-            <!-- SLOT 5 - Video -->
-            <androidx.cardview.widget.CardView android:id="@+id/card_slot_5" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="20dp" app:cardCornerRadius="12dp" app:cardBackgroundColor="#111111" app:cardElevation="0dp">
-                <LinearLayout android:layout_width="match_parent" android:layout_height="72dp" android:orientation="horizontal" android:gravity="center_vertical" android:paddingStart="14dp" android:paddingEnd="8dp">
-                    <TextView android:layout_width="32dp" android:layout_height="32dp" android:text="5" android:textColor="#FFFFFF" android:textSize="15sp" android:textStyle="bold" android:gravity="center" android:backgroundTint="#7C3AED" android:background="@drawable/bg_slot_badge" android:layout_marginEnd="12dp"/>
-                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical">
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/slot_video_5" android:textColor="#FFFFFF" android:textSize="14sp" android:textStyle="bold"/>
-                        <TextView android:id="@+id/tv_slot_5_status" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/slot_empty" android:textColor="#555555" android:textSize="12sp"/>
-                    </LinearLayout>
-                    <ImageView android:id="@+id/iv_slot_5" android:layout_width="52dp" android:layout_height="52dp" android:scaleType="centerCrop" android:background="#1E1E1E" android:visibility="gone" android:contentDescription="Slot 5" android:layout_marginEnd="8dp"/>
-                    <com.google.android.material.button.MaterialButton android:id="@+id/btn_pick_slot_5" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/pick" android:textSize="12sp" android:textColor="#A78BFA" style="@style/Widget.MaterialComponents.Button.OutlinedButton" app:strokeColor="#A78BFA" app:cornerRadius="8dp" android:paddingStart="12dp" android:paddingEnd="12dp"/>
-                </LinearLayout>
-            </androidx.cardview.widget.CardView>
+                <!-- SLOT 4 -->
+                <FrameLayout
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    app:layout_columnWeight="1"
+                    app:layout_rowWeight="1"
+                    app:layout_gravity="fill"
+                    android:layout_margin="6dp">
+                    <androidx.cardview.widget.CardView
+                        android:id="@+id/card_slot_4"
+                        android:layout_width="match_parent"
+                        android:layout_height="160dp"
+                        app:cardCornerRadius="14dp"
+                        app:cardBackgroundColor="#111111"
+                        app:cardElevation="0dp"
+                        app:cardPreventCornerOverlap="false">
+                        <FrameLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent">
+                            <ImageView
+                                android:id="@+id/iv_slot_4"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:scaleType="centerCrop"
+                                android:background="#1E1E1E"
+                                android:visibility="gone"
+                                android:contentDescription="Slot 4"/>
+                            <LinearLayout
+                                android:id="@+id/placeholder_slot_4"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:orientation="vertical"
+                                android:gravity="center"
+                                android:background="@drawable/bg_slot_placeholder">
+                                <ImageView
+                                    android:layout_width="32dp"
+                                    android:layout_height="32dp"
+                                    android:src="@drawable/ic_image"
+                                    android:tint="#555555"
+                                    android:contentDescription="Add"/>
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="صورة 4"
+                                    android:textColor="#666666"
+                                    android:textSize="11sp"
+                                    android:layout_marginTop="6dp"/>
+                            </LinearLayout>
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="4"
+                                android:textColor="#FFFFFF"
+                                android:textSize="11sp"
+                                android:textStyle="bold"
+                                android:background="@drawable/bg_slot_badge"
+                                android:layout_gravity="top|start"
+                                android:layout_margin="6dp"
+                                android:paddingStart="6dp"
+                                android:paddingEnd="6dp"
+                                android:paddingTop="2dp"
+                                android:paddingBottom="2dp"/>
+                            <ImageButton
+                                android:id="@+id/btn_delete_slot_4"
+                                android:layout_width="28dp"
+                                android:layout_height="28dp"
+                                android:src="@drawable/ic_close"
+                                android:background="#CC000000"
+                                android:tint="#EF4444"
+                                android:padding="6dp"
+                                android:visibility="gone"
+                                android:layout_gravity="top|end"
+                                android:layout_margin="6dp"
+                                android:contentDescription="Delete slot 4"/>
+                            <ImageButton
+                                android:id="@+id/btn_rotate_slot_4"
+                                android:layout_width="28dp"
+                                android:layout_height="28dp"
+                                android:src="@drawable/ic_rotate_cw"
+                                android:background="#CC000000"
+                                android:tint="#4F8EF7"
+                                android:padding="6dp"
+                                android:visibility="gone"
+                                android:layout_gravity="bottom|start"
+                                android:layout_margin="6dp"
+                                android:contentDescription="Rotate slot 4"/>
+                        </FrameLayout>
+                    </androidx.cardview.widget.CardView>
+                    <View
+                        android:id="@+id/btn_pick_slot_4"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:background="?android:attr/selectableItemBackground"/>
+                </FrameLayout>
+
+            </androidx.gridlayout.widget.GridLayout>
+
+            <!-- Section: Videos -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="🎬  الفيديو"
+                android:textColor="#FFFFFF"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:layout_marginTop="20dp"
+                android:layout_marginBottom="10dp"/>
+
+            <!-- 2x2 grid of video squares -->
+            <androidx.gridlayout.widget.GridLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:columnCount="2"
+                app:rowCount="2"
+                app:orientation="horizontal">
+
+                <!-- SLOT 5 -->
+                <FrameLayout
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    app:layout_columnWeight="1"
+                    app:layout_rowWeight="1"
+                    app:layout_gravity="fill"
+                    android:layout_margin="6dp">
+                    <androidx.cardview.widget.CardView
+                        android:id="@+id/card_slot_5"
+                        android:layout_width="match_parent"
+                        android:layout_height="160dp"
+                        app:cardCornerRadius="14dp"
+                        app:cardBackgroundColor="#111111"
+                        app:cardElevation="0dp"
+                        app:cardPreventCornerOverlap="false">
+                        <FrameLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent">
+                            <ImageView
+                                android:id="@+id/iv_slot_5"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:scaleType="centerCrop"
+                                android:background="#1E1E1E"
+                                android:visibility="gone"
+                                android:contentDescription="Slot 5"/>
+                            <LinearLayout
+                                android:id="@+id/placeholder_slot_5"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:orientation="vertical"
+                                android:gravity="center"
+                                android:background="@drawable/bg_slot_placeholder_video">
+                                <ImageView
+                                    android:layout_width="32dp"
+                                    android:layout_height="32dp"
+                                    android:src="@drawable/ic_video"
+                                    android:tint="#7C3AED"
+                                    android:contentDescription="Add"/>
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="فيديو 1"
+                                    android:textColor="#7C3AED"
+                                    android:textSize="11sp"
+                                    android:layout_marginTop="6dp"/>
+                            </LinearLayout>
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="5"
+                                android:textColor="#FFFFFF"
+                                android:textSize="11sp"
+                                android:textStyle="bold"
+                                android:backgroundTint="#7C3AED"
+                                android:background="@drawable/bg_slot_badge"
+                                android:layout_gravity="top|start"
+                                android:layout_margin="6dp"
+                                android:paddingStart="6dp"
+                                android:paddingEnd="6dp"
+                                android:paddingTop="2dp"
+                                android:paddingBottom="2dp"/>
+                            <ImageButton
+                                android:id="@+id/btn_delete_slot_5"
+                                android:layout_width="28dp"
+                                android:layout_height="28dp"
+                                android:src="@drawable/ic_close"
+                                android:background="#CC000000"
+                                android:tint="#EF4444"
+                                android:padding="6dp"
+                                android:visibility="gone"
+                                android:layout_gravity="top|end"
+                                android:layout_margin="6dp"
+                                android:contentDescription="Delete slot 5"/>
+                        </FrameLayout>
+                    </androidx.cardview.widget.CardView>
+                    <View
+                        android:id="@+id/btn_pick_slot_5"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:background="?android:attr/selectableItemBackground"/>
+                </FrameLayout>
+
+                <!-- SLOT 6 -->
+                <FrameLayout
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    app:layout_columnWeight="1"
+                    app:layout_rowWeight="1"
+                    app:layout_gravity="fill"
+                    android:layout_margin="6dp">
+                    <androidx.cardview.widget.CardView
+                        android:id="@+id/card_slot_6"
+                        android:layout_width="match_parent"
+                        android:layout_height="160dp"
+                        app:cardCornerRadius="14dp"
+                        app:cardBackgroundColor="#111111"
+                        app:cardElevation="0dp"
+                        app:cardPreventCornerOverlap="false">
+                        <FrameLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent">
+                            <ImageView
+                                android:id="@+id/iv_slot_6"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:scaleType="centerCrop"
+                                android:background="#1E1E1E"
+                                android:visibility="gone"
+                                android:contentDescription="Slot 6"/>
+                            <LinearLayout
+                                android:id="@+id/placeholder_slot_6"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:orientation="vertical"
+                                android:gravity="center"
+                                android:background="@drawable/bg_slot_placeholder_video">
+                                <ImageView
+                                    android:layout_width="32dp"
+                                    android:layout_height="32dp"
+                                    android:src="@drawable/ic_video"
+                                    android:tint="#7C3AED"
+                                    android:contentDescription="Add"/>
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="فيديو 2"
+                                    android:textColor="#7C3AED"
+                                    android:textSize="11sp"
+                                    android:layout_marginTop="6dp"/>
+                            </LinearLayout>
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="6"
+                                android:textColor="#FFFFFF"
+                                android:textSize="11sp"
+                                android:textStyle="bold"
+                                android:backgroundTint="#7C3AED"
+                                android:background="@drawable/bg_slot_badge"
+                                android:layout_gravity="top|start"
+                                android:layout_margin="6dp"
+                                android:paddingStart="6dp"
+                                android:paddingEnd="6dp"
+                                android:paddingTop="2dp"
+                                android:paddingBottom="2dp"/>
+                            <ImageButton
+                                android:id="@+id/btn_delete_slot_6"
+                                android:layout_width="28dp"
+                                android:layout_height="28dp"
+                                android:src="@drawable/ic_close"
+                                android:background="#CC000000"
+                                android:tint="#EF4444"
+                                android:padding="6dp"
+                                android:visibility="gone"
+                                android:layout_gravity="top|end"
+                                android:layout_margin="6dp"
+                                android:contentDescription="Delete slot 6"/>
+                        </FrameLayout>
+                    </androidx.cardview.widget.CardView>
+                    <View
+                        android:id="@+id/btn_pick_slot_6"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:background="?android:attr/selectableItemBackground"/>
+                </FrameLayout>
+
+                <!-- SLOT 7 -->
+                <FrameLayout
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    app:layout_columnWeight="1"
+                    app:layout_rowWeight="1"
+                    app:layout_gravity="fill"
+                    android:layout_margin="6dp">
+                    <androidx.cardview.widget.CardView
+                        android:id="@+id/card_slot_7"
+                        android:layout_width="match_parent"
+                        android:layout_height="160dp"
+                        app:cardCornerRadius="14dp"
+                        app:cardBackgroundColor="#111111"
+                        app:cardElevation="0dp"
+                        app:cardPreventCornerOverlap="false">
+                        <FrameLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent">
+                            <ImageView
+                                android:id="@+id/iv_slot_7"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:scaleType="centerCrop"
+                                android:background="#1E1E1E"
+                                android:visibility="gone"
+                                android:contentDescription="Slot 7"/>
+                            <LinearLayout
+                                android:id="@+id/placeholder_slot_7"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:orientation="vertical"
+                                android:gravity="center"
+                                android:background="@drawable/bg_slot_placeholder_video">
+                                <ImageView
+                                    android:layout_width="32dp"
+                                    android:layout_height="32dp"
+                                    android:src="@drawable/ic_video"
+                                    android:tint="#7C3AED"
+                                    android:contentDescription="Add"/>
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="فيديو 3"
+                                    android:textColor="#7C3AED"
+                                    android:textSize="11sp"
+                                    android:layout_marginTop="6dp"/>
+                            </LinearLayout>
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="7"
+                                android:textColor="#FFFFFF"
+                                android:textSize="11sp"
+                                android:textStyle="bold"
+                                android:backgroundTint="#7C3AED"
+                                android:background="@drawable/bg_slot_badge"
+                                android:layout_gravity="top|start"
+                                android:layout_margin="6dp"
+                                android:paddingStart="6dp"
+                                android:paddingEnd="6dp"
+                                android:paddingTop="2dp"
+                                android:paddingBottom="2dp"/>
+                            <ImageButton
+                                android:id="@+id/btn_delete_slot_7"
+                                android:layout_width="28dp"
+                                android:layout_height="28dp"
+                                android:src="@drawable/ic_close"
+                                android:background="#CC000000"
+                                android:tint="#EF4444"
+                                android:padding="6dp"
+                                android:visibility="gone"
+                                android:layout_gravity="top|end"
+                                android:layout_margin="6dp"
+                                android:contentDescription="Delete slot 7"/>
+                        </FrameLayout>
+                    </androidx.cardview.widget.CardView>
+                    <View
+                        android:id="@+id/btn_pick_slot_7"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:background="?android:attr/selectableItemBackground"/>
+                </FrameLayout>
+
+                <!-- SLOT 8 -->
+                <FrameLayout
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    app:layout_columnWeight="1"
+                    app:layout_rowWeight="1"
+                    app:layout_gravity="fill"
+                    android:layout_margin="6dp">
+                    <androidx.cardview.widget.CardView
+                        android:id="@+id/card_slot_8"
+                        android:layout_width="match_parent"
+                        android:layout_height="160dp"
+                        app:cardCornerRadius="14dp"
+                        app:cardBackgroundColor="#111111"
+                        app:cardElevation="0dp"
+                        app:cardPreventCornerOverlap="false">
+                        <FrameLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent">
+                            <ImageView
+                                android:id="@+id/iv_slot_8"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:scaleType="centerCrop"
+                                android:background="#1E1E1E"
+                                android:visibility="gone"
+                                android:contentDescription="Slot 8"/>
+                            <LinearLayout
+                                android:id="@+id/placeholder_slot_8"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:orientation="vertical"
+                                android:gravity="center"
+                                android:background="@drawable/bg_slot_placeholder_video">
+                                <ImageView
+                                    android:layout_width="32dp"
+                                    android:layout_height="32dp"
+                                    android:src="@drawable/ic_video"
+                                    android:tint="#7C3AED"
+                                    android:contentDescription="Add"/>
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="فيديو 4"
+                                    android:textColor="#7C3AED"
+                                    android:textSize="11sp"
+                                    android:layout_marginTop="6dp"/>
+                            </LinearLayout>
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="8"
+                                android:textColor="#FFFFFF"
+                                android:textSize="11sp"
+                                android:textStyle="bold"
+                                android:backgroundTint="#7C3AED"
+                                android:background="@drawable/bg_slot_badge"
+                                android:layout_gravity="top|start"
+                                android:layout_margin="6dp"
+                                android:paddingStart="6dp"
+                                android:paddingEnd="6dp"
+                                android:paddingTop="2dp"
+                                android:paddingBottom="2dp"/>
+                            <ImageButton
+                                android:id="@+id/btn_delete_slot_8"
+                                android:layout_width="28dp"
+                                android:layout_height="28dp"
+                                android:src="@drawable/ic_close"
+                                android:background="#CC000000"
+                                android:tint="#EF4444"
+                                android:padding="6dp"
+                                android:visibility="gone"
+                                android:layout_gravity="top|end"
+                                android:layout_margin="6dp"
+                                android:contentDescription="Delete slot 8"/>
+                        </FrameLayout>
+                    </androidx.cardview.widget.CardView>
+                    <View
+                        android:id="@+id/btn_pick_slot_8"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:background="?android:attr/selectableItemBackground"/>
+                </FrameLayout>
+
+            </androidx.gridlayout.widget.GridLayout>
 
             <!-- Start / Stop button -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_start_stop"
                 android:layout_width="match_parent"
                 android:layout_height="64dp"
+                android:layout_marginTop="20dp"
                 android:text="@string/start_vcam"
                 android:textSize="17sp"
                 android:textStyle="bold"
@@ -233,7 +889,6 @@
                     android:orientation="vertical"
                     android:padding="14dp">
 
-                    <!-- Enable link row -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -255,7 +910,6 @@
                             android:checked="false"/>
                     </LinearLayout>
 
-                    <!-- Connection info (shown when link is active) -->
                     <LinearLayout
                         android:id="@+id/layout_link_info"
                         android:layout_width="match_parent"

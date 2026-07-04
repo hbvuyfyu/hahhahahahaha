@@ -9,11 +9,13 @@ import android.provider.Settings
 import android.view.View
 import android.widget.ImageButton
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
@@ -38,13 +40,13 @@ class MainActivity : AppCompatActivity() {
     private val pickMedia = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         uri ?: return@registerForActivityResult
         val slot    = pendingSlot
-        val isVideo = slot == 5
+        val isVideo = slot >= 5
         lifecycleScope.launch {
             withContext(Dispatchers.IO) {
                 MediaSlotManager.setSlot(this@MainActivity, slot, uri, isVideo)
             }
             refreshSlotUI(slot)
-            binding.btnStartStop.isEnabled = MediaSlotManager.isSlotSet(this@MainActivity, 1)
+            binding.btnStartStop.isEnabled = MediaSlotManager.isSlotSet(this, 1)
         }
     }
 
@@ -68,11 +70,12 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
         setupObservers()
         setupSlotPickers()
+        setupDeleteButtons()
         setupRotateButtons()
         setupStartStop()
         setupLinkSwitch()
         requestPermissions()
-        (1..5).forEach { refreshSlotUI(it) }
+        (1..8).forEach { refreshSlotUI(it) }
         binding.btnStartStop.isEnabled = MediaSlotManager.isSlotSet(this, 1)
     }
 
@@ -88,7 +91,6 @@ class MainActivity : AppCompatActivity() {
                 logoutToCodeScreen()
             }
         }
-        // Refresh link UI state
         refreshLinkUI()
     }
 
@@ -124,9 +126,10 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // ── Slot pickers ──────────────────────────────────────────────────────
+    // ── Slot pickers (1-4 images, 5-8 videos) ─────────────────────────────
 
     private fun setupSlotPickers() {
+        // Image slots 1-4
         listOf(
             R.id.btn_pick_slot_1 to 1,
             R.id.btn_pick_slot_2 to 2,
@@ -138,13 +141,43 @@ class MainActivity : AppCompatActivity() {
                 pickMedia.launch("image/*")
             }
         }
-        binding.root.findViewById<View>(R.id.btn_pick_slot_5)?.setOnClickListener {
-            pendingSlot = 5
-            pickMedia.launch("video/*")
+        // Video slots 5-8
+        listOf(
+            R.id.btn_pick_slot_5 to 5,
+            R.id.btn_pick_slot_6 to 6,
+            R.id.btn_pick_slot_7 to 7,
+            R.id.btn_pick_slot_8 to 8,
+        ).forEach { (btnId, slot) ->
+            binding.root.findViewById<View>(btnId)?.setOnClickListener {
+                pendingSlot = slot
+                pickMedia.launch("video/*")
+            }
         }
     }
 
-    // ── Rotate buttons ────────────────────────────────────────────────────
+    // ── Delete buttons ─────────────────────────────────────────────────────
+
+    private fun setupDeleteButtons() {
+        listOf(
+            R.id.btn_delete_slot_1 to 1,
+            R.id.btn_delete_slot_2 to 2,
+            R.id.btn_delete_slot_3 to 3,
+            R.id.btn_delete_slot_4 to 4,
+            R.id.btn_delete_slot_5 to 5,
+            R.id.btn_delete_slot_6 to 6,
+            R.id.btn_delete_slot_7 to 7,
+            R.id.btn_delete_slot_8 to 8,
+        ).forEach { (btnId, slot) ->
+            binding.root.findViewById<ImageButton>(btnId)?.setOnClickListener {
+                MediaSlotManager.clearSlot(this, slot)
+                refreshSlotUI(slot)
+                if (slot == 1) binding.btnStartStop.isEnabled = false
+                showSnack("تم حذف الحقل $slot")
+            }
+        }
+    }
+
+    // ── Rotate buttons (images only: 1-4) ──────────────────────────────────
 
     private fun setupRotateButtons() {
         listOf(
@@ -207,11 +240,22 @@ class MainActivity : AppCompatActivity() {
     private fun refreshSlotUI(slot: Int) {
         val ivId = when (slot) {
             1 -> R.id.iv_slot_1; 2 -> R.id.iv_slot_2; 3 -> R.id.iv_slot_3
-            4 -> R.id.iv_slot_4; else -> R.id.iv_slot_5
+            4 -> R.id.iv_slot_4; 5 -> R.id.iv_slot_5; 6 -> R.id.iv_slot_6
+            7 -> R.id.iv_slot_7; 8 -> R.id.iv_slot_8; else -> return
         }
-        val tvId = when (slot) {
-            1 -> R.id.tv_slot_1_status; 2 -> R.id.tv_slot_2_status; 3 -> R.id.tv_slot_3_status
-            4 -> R.id.tv_slot_4_status; else -> R.id.tv_slot_5_status
+        val placeholderId = when (slot) {
+            1 -> R.id.placeholder_slot_1; 2 -> R.id.placeholder_slot_2
+            3 -> R.id.placeholder_slot_3; 4 -> R.id.placeholder_slot_4
+            5 -> R.id.placeholder_slot_5; 6 -> R.id.placeholder_slot_6
+            7 -> R.id.placeholder_slot_7; 8 -> R.id.placeholder_slot_8
+            else -> return
+        }
+        val deleteBtnId = when (slot) {
+            1 -> R.id.btn_delete_slot_1; 2 -> R.id.btn_delete_slot_2
+            3 -> R.id.btn_delete_slot_3; 4 -> R.id.btn_delete_slot_4
+            5 -> R.id.btn_delete_slot_5; 6 -> R.id.btn_delete_slot_6
+            7 -> R.id.btn_delete_slot_7; 8 -> R.id.btn_delete_slot_8
+            else -> return
         }
         val rotateBtnId = when (slot) {
             1 -> R.id.btn_rotate_slot_1; 2 -> R.id.btn_rotate_slot_2
@@ -219,15 +263,16 @@ class MainActivity : AppCompatActivity() {
             else -> null
         }
 
-        val iv  = binding.root.findViewById<ImageView>(ivId)  ?: return
-        val tv  = binding.root.findViewById<TextView>(tvId)   ?: return
-        val rot = rotateBtnId?.let { binding.root.findViewById<ImageButton>(it) }
+        val iv          = binding.root.findViewById<ImageView>(ivId)          ?: return
+        val placeholder = binding.root.findViewById<LinearLayout>(placeholderId) ?: return
+        val delBtn      = binding.root.findViewById<ImageButton>(deleteBtnId)  ?: return
+        val rotBtn      = rotateBtnId?.let { binding.root.findViewById<ImageButton>(it) }
 
         if (MediaSlotManager.isSlotSet(this, slot)) {
-            tv.text    = getString(R.string.slot_ready)
-            tv.setTextColor(0xFF22C55E.toInt())
-            iv.visibility  = View.VISIBLE
-            rot?.visibility = View.VISIBLE
+            placeholder.visibility = View.GONE
+            iv.visibility    = View.VISIBLE
+            delBtn.visibility = View.VISIBLE
+            rotBtn?.visibility = if (slot <= 4) View.VISIBLE else View.GONE
 
             lifecycleScope.launch {
                 val bmp: Bitmap? = withContext(Dispatchers.IO) {
@@ -236,10 +281,10 @@ class MainActivity : AppCompatActivity() {
                 if (bmp != null) iv.setImageBitmap(bmp)
             }
         } else {
-            tv.text = getString(R.string.slot_empty)
-            tv.setTextColor(0xFF555555.toInt())
-            iv.visibility  = View.GONE
-            rot?.visibility = View.GONE
+            placeholder.visibility = View.VISIBLE
+            iv.visibility    = View.GONE
+            delBtn.visibility = View.GONE
+            rotBtn?.visibility = View.GONE
         }
     }
 

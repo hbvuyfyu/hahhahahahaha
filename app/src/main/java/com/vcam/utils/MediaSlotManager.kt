@@ -10,7 +10,10 @@ import java.io.File
 import java.io.FileOutputStream
 
 /**
- * Manages 5 media slots (1-4 = image, 5 = video).
+ * Manages 8 media slots:
+ *   - Slots 1-4: images
+ *   - Slots 5-8: videos
+ *
  * Files are copied to internal storage so they persist and are accessible by root.
  * Supports per-slot rotation (stored in SharedPreferences).
  */
@@ -38,7 +41,7 @@ object MediaSlotManager {
         }
 
     fun isSlotVideo(context: Context, slot: Int): Boolean =
-        prefs(context).getBoolean("video_$slot", slot == 5)
+        prefs(context).getBoolean("video_$slot", slot >= 5)
 
     fun isSlotSet(context: Context, slot: Int): Boolean =
         getSlotPath(context, slot) != null

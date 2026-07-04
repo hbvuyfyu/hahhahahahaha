@@ -80,6 +80,8 @@ plugins {
       implementation(libs.androidx.appcompat)
       implementation(libs.material)
       implementation(libs.androidx.constraintlayout)
+      implementation(libs.androidx.gridlayout)
+      implementation(libs.androidx.cardview)
       implementation(libs.androidx.lifecycle.viewmodel)
       implementation(libs.androidx.lifecycle.runtime)
       implementation(libs.androidx.activity.ktx)

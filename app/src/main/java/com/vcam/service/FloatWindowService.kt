@@ -69,6 +69,8 @@ class FloatWindowService : Service() {
     private var isMirrored = false
     private var activeSlot = 1
     private var isExpanded = false
+    private var isExtraVisible = false
+    private var currentMode = "images"  // "images" or "videos"
 
     // Zoom, scale, pan state
     private var zoomFactor = 1.0f
@@ -77,8 +79,7 @@ class FloatWindowService : Service() {
     private var panY = 0
 
     private val slotBtnIds = listOf(
-        R.id.btn_slot_1, R.id.btn_slot_2, R.id.btn_slot_3,
-        R.id.btn_slot_4, R.id.btn_slot_5
+        R.id.btn_slot_1, R.id.btn_slot_2, R.id.btn_slot_3, R.id.btn_slot_4
     )
 
     override fun onBind(intent: Intent?): IBinder? = null
@@ -119,13 +120,41 @@ class FloatWindowService : Service() {
             if (targetName.length > 18) targetName.take(16) + "…" else targetName
         updateTypeLabel(view, activeSlot)
 
-        // ── Slot buttons ──
+        // ── Mode tabs (Images / Videos) ──
+        val tabImages = view.findViewById<TextView>(R.id.btn_tab_images)
+        val tabVideos = view.findViewById<TextView>(R.id.btn_tab_videos)
+
+        tabImages?.setOnClickListener {
+            if (currentMode != "images") {
+                currentMode = "images"
+                activeSlot = 1
+                updateModeTabs(view)
+                updateSlotButtonVisuals(view, activeSlot)
+                updateTypeLabel(view, activeSlot)
+                sendBroadcast(Intent(ACTION_SWITCH_SLOT).putExtra(EXTRA_SLOT, activeSlot))
+            }
+        }
+
+        tabVideos?.setOnClickListener {
+            if (currentMode != "videos") {
+                currentMode = "videos"
+                activeSlot = 5
+                updateModeTabs(view)
+                updateSlotButtonVisuals(view, activeSlot)
+                updateTypeLabel(view, activeSlot)
+                sendBroadcast(Intent(ACTION_SWITCH_SLOT).putExtra(EXTRA_SLOT, activeSlot))
+            }
+        }
+
+        // ── Slot buttons (1-4 map to images 1-4 or videos 5-8) ──
         slotBtnIds.forEachIndexed { idx, btnId ->
             val slot = idx + 1
             view.findViewById<TextView>(btnId)?.setOnClickListener {
-                switchToSlot(view, slot)
+                val actualSlot = if (currentMode == "videos") slot + 4 else slot
+                switchToSlot(view, actualSlot)
             }
         }
+        updateModeTabs(view)
         updateSlotButtonVisuals(view, activeSlot)
 
         // ── FAB main bubble — toggle expand/collapse ──
@@ -135,6 +164,18 @@ class FloatWindowService : Service() {
         fabMain?.setOnClickListener {
             if (isExpanded) collapsePanel(fabMain, panel)
             else            expandPanel(fabMain, panel)
+        }
+
+        // ── Expand/collapse arrow button (toggles extra controls) ──
+        view.findViewById<Button>(R.id.btn_float_expand)?.setOnClickListener {
+            val extra = view.findViewById<View>(R.id.float_extra_controls)
+            if (extra != null) {
+                isExtraVisible = !isExtraVisible
+                extra.visibility = if (isExtraVisible) View.VISIBLE else View.GONE
+                val btn = it as Button
+                btn.text = if (isExtraVisible) "▲ إخفاء الأزرار" else "▼ المزيد من الأزرار"
+                animateBounce(it)
+            }
         }
 
         // ── Preview ──
@@ -285,6 +326,22 @@ class FloatWindowService : Service() {
             "${(scaleFactor * 100).toInt()}%"
     }
 
+    private fun updateModeTabs(view: View) {
+        val tabImages = view.findViewById<TextView>(R.id.btn_tab_images)
+        val tabVideos = view.findViewById<TextView>(R.id.btn_tab_videos)
+        if (currentMode == "images") {
+            tabImages?.setTextColor(0xFFFFFFFF.toInt())
+            tabImages?.setBackgroundResource(R.drawable.bg_slot_btn_active)
+            tabVideos?.setTextColor(0xFFAAAAAA.toInt())
+            tabVideos?.setBackgroundResource(R.drawable.bg_slot_btn_inactive)
+        } else {
+            tabVideos?.setTextColor(0xFFFFFFFF.toInt())
+            tabVideos?.setBackgroundResource(R.drawable.bg_slot_btn_video_active)
+            tabImages?.setTextColor(0xFFAAAAAA.toInt())
+            tabImages?.setBackgroundResource(R.drawable.bg_slot_btn_inactive)
+        }
+    }
+
     // ── Expand / Collapse animations ──────────────────────────────────
 
     private fun expandPanel(fab: ImageView?, panel: View?) {
@@ -306,6 +363,7 @@ class FloatWindowService : Service() {
     private fun collapsePanel(fab: ImageView?, panel: View?) {
         panel ?: return; fab ?: return
         isExpanded = false
+        isExtraVisible = false
         panel.animate()
             .alpha(0f).scaleX(0.8f).scaleY(0.8f)
             .setDuration(160)
@@ -352,23 +410,21 @@ class FloatWindowService : Service() {
     private fun updateSlotButtonVisuals(view: View, active: Int) {
         slotBtnIds.forEachIndexed { idx, btnId ->
             val slot = idx + 1
+            val actualSlot = if (currentMode == "videos") slot + 4 else slot
             val tv = view.findViewById<TextView>(btnId) ?: return@forEachIndexed
-            val isActive = slot == active
+            val isActive = actualSlot == active
             tv.setTextColor(if (isActive) 0xFFFFFFFF.toInt() else 0xFFAAAAAA.toInt())
             tv.setBackgroundResource(
-                when {
-                    isActive && slot == 5 -> R.drawable.bg_slot_btn_video_active
-                    isActive              -> R.drawable.bg_slot_btn_active
-                    slot == 5            -> R.drawable.bg_slot_btn_video
-                    else                 -> R.drawable.bg_slot_btn_inactive
-                }
+                if (isActive && currentMode == "videos") R.drawable.bg_slot_btn_video_active
+                else if (isActive) R.drawable.bg_slot_btn_active
+                else R.drawable.bg_slot_btn_inactive
             )
         }
     }
 
     private fun updateTypeLabel(view: View, slot: Int) {
         view.findViewById<TextView>(R.id.tv_float_type)?.text =
-            if (slot == 5) "🎬" else "📷$slot"
+            if (slot >= 5) "🎬 ${slot - 4}" else "📷 $slot"
     }
 
     // ── Preview ───────────────────────────────────────────────────────

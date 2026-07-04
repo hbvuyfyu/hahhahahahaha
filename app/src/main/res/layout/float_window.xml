@@ -10,7 +10,7 @@
          ══════════════════════════════════════════════ -->
     <LinearLayout
         android:id="@+id/float_expanded_panel"
-        android:layout_width="220dp"
+        android:layout_width="240dp"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:background="#F0050510"
@@ -54,7 +54,45 @@
                 android:text="📷 1"/>
         </LinearLayout>
 
-        <!-- Slot switcher row -->
+        <!-- ══ MODE TABS (Images / Videos) ══ -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_marginBottom="6dp">
+
+            <TextView
+                android:id="@+id/btn_tab_images"
+                android:layout_width="0dp"
+                android:layout_height="32dp"
+                android:layout_weight="1"
+                android:text="📷 صور"
+                android:gravity="center"
+                android:textColor="#FFFFFF"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:background="@drawable/bg_slot_btn_active"
+                android:layout_marginEnd="3dp"
+                android:clickable="true"
+                android:focusable="true"/>
+
+            <TextView
+                android:id="@+id/btn_tab_videos"
+                android:layout_width="0dp"
+                android:layout_height="32dp"
+                android:layout_weight="1"
+                android:text="🎬 فيديو"
+                android:gravity="center"
+                android:textColor="#AAAAAA"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:background="@drawable/bg_slot_btn_inactive"
+                android:clickable="true"
+                android:focusable="true"/>
+        </LinearLayout>
+
+        <!-- Slot switcher row (4 slots — dynamically images 1-4 or videos 5-8) -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -114,20 +152,6 @@
                 android:textSize="13sp"
                 android:textStyle="bold"
                 android:background="@drawable/bg_slot_btn_inactive"
-                android:layout_marginEnd="4dp"
-                android:clickable="true"
-                android:focusable="true"/>
-
-            <TextView
-                android:id="@+id/btn_slot_5"
-                android:layout_width="34dp"
-                android:layout_height="34dp"
-                android:text="5"
-                android:gravity="center"
-                android:textColor="#AAAAAA"
-                android:textSize="13sp"
-                android:textStyle="bold"
-                android:background="@drawable/bg_slot_btn_video"
                 android:clickable="true"
                 android:focusable="true"/>
         </LinearLayout>
@@ -139,7 +163,7 @@
             android:background="#222244"
             android:layout_marginBottom="8dp"/>
 
-        <!-- Action buttons row -->
+        <!-- ══ FIRST ROW: main action buttons (always visible) ══ -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -247,286 +271,296 @@
 
         </LinearLayout>
 
-        <!-- Divider -->
+        <!-- ══ EXPAND/COLLAPSE ARROW BUTTON ══ -->
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:background="#222244"
             android:layout_marginTop="8dp"
-            android:layout_marginBottom="8dp"/>
+            android:layout_marginBottom="4dp"/>
 
-        <!-- ══ ZOOM controls (تقريب / تبعيد) ══ -->
-        <TextView
+        <Button
+            android:id="@+id/btn_float_expand"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="الزوم"
-            android:textColor="#888888"
-            android:textSize="9sp"
-            android:textAllCaps="true"
-            android:gravity="center"
-            android:layout_marginBottom="6dp"/>
+            android:layout_height="32dp"
+            android:text="▼ المزيد من الأزرار"
+            android:textSize="10sp"
+            android:textColor="#4F8EF7"
+            android:backgroundTint="#224F8EF7"
+            android:padding="0dp"
+            style="@style/Widget.MaterialComponents.Button"/>
 
+        <!-- ══ EXPANDABLE SECTION: zoom / scale / pan (hidden until expanded) ══ -->
         <LinearLayout
+            android:id="@+id/float_extra_controls"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center"
-            android:layout_marginBottom="4dp">
+            android:orientation="vertical"
+            android:visibility="gone"
+            android:layout_marginTop="6dp">
 
-            <!-- Zoom Out (تبعيد) -->
-            <LinearLayout
-                android:layout_width="0dp"
+            <!-- ══ ZOOM controls (تقريب / تبعيد) ══ -->
+            <TextView
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical"
-                android:gravity="center">
+                android:text="الزوم"
+                android:textColor="#888888"
+                android:textSize="9sp"
+                android:textAllCaps="true"
+                android:gravity="center"
+                android:layout_marginBottom="6dp"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:layout_marginBottom="4dp">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:gravity="center">
+                    <Button
+                        android:id="@+id/btn_float_zoom_out"
+                        android:layout_width="44dp"
+                        android:layout_height="44dp"
+                        android:text="−"
+                        android:textSize="20sp"
+                        android:textColor="#FFFFFF"
+                        android:backgroundTint="#33FFFFFF"
+                        android:padding="0dp"
+                        style="@style/Widget.MaterialComponents.Button"/>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="تبعيد"
+                        android:textColor="#888888"
+                        android:textSize="9sp"
+                        android:layout_marginTop="3dp"/>
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/tv_float_zoom_label"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="1.0×"
+                    android:textColor="#4F8EF7"
+                    android:textSize="11sp"
+                    android:gravity="center"/>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:gravity="center">
+                    <Button
+                        android:id="@+id/btn_float_zoom_in"
+                        android:layout_width="44dp"
+                        android:layout_height="44dp"
+                        android:text="+"
+                        android:textSize="20sp"
+                        android:textColor="#FFFFFF"
+                        android:backgroundTint="#334F8EF7"
+                        android:padding="0dp"
+                        style="@style/Widget.MaterialComponents.Button"/>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="تقريب"
+                        android:textColor="#888888"
+                        android:textSize="9sp"
+                        android:layout_marginTop="3dp"/>
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- ══ SCALE controls (تكبير / تصغير) ══ -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#222244"
+                android:layout_marginTop="4dp"
+                android:layout_marginBottom="8dp"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="الحجم"
+                android:textColor="#888888"
+                android:textSize="9sp"
+                android:textAllCaps="true"
+                android:gravity="center"
+                android:layout_marginBottom="6dp"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:layout_marginBottom="4dp">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:gravity="center">
+                    <Button
+                        android:id="@+id/btn_float_scale_down"
+                        android:layout_width="44dp"
+                        android:layout_height="44dp"
+                        android:text="⊖"
+                        android:textSize="18sp"
+                        android:textColor="#FFFFFF"
+                        android:backgroundTint="#33FFFFFF"
+                        android:padding="0dp"
+                        style="@style/Widget.MaterialComponents.Button"/>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="تصغير"
+                        android:textColor="#888888"
+                        android:textSize="9sp"
+                        android:layout_marginTop="3dp"/>
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/tv_float_scale_label"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="100%"
+                    android:textColor="#4F8EF7"
+                    android:textSize="11sp"
+                    android:gravity="center"/>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:gravity="center">
+                    <Button
+                        android:id="@+id/btn_float_scale_up"
+                        android:layout_width="44dp"
+                        android:layout_height="44dp"
+                        android:text="⊕"
+                        android:textSize="18sp"
+                        android:textColor="#FFFFFF"
+                        android:backgroundTint="#3322C55E"
+                        android:padding="0dp"
+                        style="@style/Widget.MaterialComponents.Button"/>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="تكبير"
+                        android:textColor="#888888"
+                        android:textSize="9sp"
+                        android:layout_marginTop="3dp"/>
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- ══ PAN ARROWS (أسهم التحريك) ══ -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#222244"
+                android:layout_marginTop="4dp"
+                android:layout_marginBottom="8dp"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="التحريك (حر — غير مقيد بالإطار)"
+                android:textColor="#888888"
+                android:textSize="9sp"
+                android:textAllCaps="true"
+                android:gravity="center"
+                android:layout_marginBottom="6dp"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:layout_marginBottom="2dp">
                 <Button
-                    android:id="@+id/btn_float_zoom_out"
+                    android:id="@+id/btn_float_pan_up"
                     android:layout_width="44dp"
                     android:layout_height="44dp"
-                    android:text="−"
-                    android:textSize="20sp"
+                    android:text="▲"
+                    android:textSize="16sp"
                     android:textColor="#FFFFFF"
                     android:backgroundTint="#33FFFFFF"
                     android:padding="0dp"
                     style="@style/Widget.MaterialComponents.Button"/>
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="تبعيد"
-                    android:textColor="#888888"
-                    android:textSize="9sp"
-                    android:layout_marginTop="3dp"/>
             </LinearLayout>
 
-            <!-- Zoom label -->
-            <TextView
-                android:id="@+id/tv_float_zoom_label"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="1.0×"
-                android:textColor="#4F8EF7"
-                android:textSize="11sp"
-                android:gravity="center"/>
-
-            <!-- Zoom In (تقريب) -->
             <LinearLayout
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical"
-                android:gravity="center">
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:layout_marginBottom="2dp">
+
                 <Button
-                    android:id="@+id/btn_float_zoom_in"
+                    android:id="@+id/btn_float_pan_left"
                     android:layout_width="44dp"
                     android:layout_height="44dp"
-                    android:text="+"
-                    android:textSize="20sp"
+                    android:text="◀"
+                    android:textSize="16sp"
                     android:textColor="#FFFFFF"
-                    android:backgroundTint="#334F8EF7"
+                    android:backgroundTint="#33FFFFFF"
                     android:padding="0dp"
+                    android:layout_marginEnd="6dp"
                     style="@style/Widget.MaterialComponents.Button"/>
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="تقريب"
-                    android:textColor="#888888"
-                    android:textSize="9sp"
-                    android:layout_marginTop="3dp"/>
-            </LinearLayout>
 
-        </LinearLayout>
-
-        <!-- ══ SCALE controls (تكبير / تصغير) ══ -->
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="#222244"
-            android:layout_marginTop="4dp"
-            android:layout_marginBottom="8dp"/>
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="الحجم"
-            android:textColor="#888888"
-            android:textSize="9sp"
-            android:textAllCaps="true"
-            android:gravity="center"
-            android:layout_marginBottom="6dp"/>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center"
-            android:layout_marginBottom="4dp">
-
-            <!-- Scale Down (تصغير) -->
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical"
-                android:gravity="center">
                 <Button
-                    android:id="@+id/btn_float_scale_down"
+                    android:id="@+id/btn_float_pan_reset"
                     android:layout_width="44dp"
                     android:layout_height="44dp"
-                    android:text="⊖"
-                    android:textSize="18sp"
+                    android:text="⌖"
+                    android:textSize="16sp"
+                    android:textColor="#AAAAAA"
+                    android:backgroundTint="#22FFFFFF"
+                    android:padding="0dp"
+                    android:layout_marginEnd="6dp"
+                    style="@style/Widget.MaterialComponents.Button"/>
+
+                <Button
+                    android:id="@+id/btn_float_pan_right"
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
+                    android:text="▶"
+                    android:textSize="16sp"
                     android:textColor="#FFFFFF"
                     android:backgroundTint="#33FFFFFF"
                     android:padding="0dp"
                     style="@style/Widget.MaterialComponents.Button"/>
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="تصغير"
-                    android:textColor="#888888"
-                    android:textSize="9sp"
-                    android:layout_marginTop="3dp"/>
             </LinearLayout>
 
-            <!-- Scale label -->
-            <TextView
-                android:id="@+id/tv_float_scale_label"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="100%"
-                android:textColor="#4F8EF7"
-                android:textSize="11sp"
-                android:gravity="center"/>
-
-            <!-- Scale Up (تكبير) -->
             <LinearLayout
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical"
-                android:gravity="center">
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:layout_marginBottom="4dp">
                 <Button
-                    android:id="@+id/btn_float_scale_up"
+                    android:id="@+id/btn_float_pan_down"
                     android:layout_width="44dp"
                     android:layout_height="44dp"
-                    android:text="⊕"
-                    android:textSize="18sp"
+                    android:text="▼"
+                    android:textSize="16sp"
                     android:textColor="#FFFFFF"
-                    android:backgroundTint="#3322C55E"
+                    android:backgroundTint="#33FFFFFF"
                     android:padding="0dp"
                     style="@style/Widget.MaterialComponents.Button"/>
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="تكبير"
-                    android:textColor="#888888"
-                    android:textSize="9sp"
-                    android:layout_marginTop="3dp"/>
             </LinearLayout>
 
-        </LinearLayout>
-
-        <!-- ══ PAN ARROWS (أسهم التحريك) ══ -->
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="#222244"
-            android:layout_marginTop="4dp"
-            android:layout_marginBottom="8dp"/>
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="التحريك"
-            android:textColor="#888888"
-            android:textSize="9sp"
-            android:textAllCaps="true"
-            android:gravity="center"
-            android:layout_marginBottom="6dp"/>
-
-        <!-- Arrow Up -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center"
-            android:layout_marginBottom="2dp">
-            <Button
-                android:id="@+id/btn_float_pan_up"
-                android:layout_width="44dp"
-                android:layout_height="44dp"
-                android:text="▲"
-                android:textSize="16sp"
-                android:textColor="#FFFFFF"
-                android:backgroundTint="#33FFFFFF"
-                android:padding="0dp"
-                style="@style/Widget.MaterialComponents.Button"/>
-        </LinearLayout>
-
-        <!-- Arrow Left + Reset + Arrow Right -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center"
-            android:layout_marginBottom="2dp">
-
-            <Button
-                android:id="@+id/btn_float_pan_left"
-                android:layout_width="44dp"
-                android:layout_height="44dp"
-                android:text="◀"
-                android:textSize="16sp"
-                android:textColor="#FFFFFF"
-                android:backgroundTint="#33FFFFFF"
-                android:padding="0dp"
-                android:layout_marginEnd="6dp"
-                style="@style/Widget.MaterialComponents.Button"/>
-
-            <Button
-                android:id="@+id/btn_float_pan_reset"
-                android:layout_width="44dp"
-                android:layout_height="44dp"
-                android:text="⌖"
-                android:textSize="16sp"
-                android:textColor="#AAAAAA"
-                android:backgroundTint="#22FFFFFF"
-                android:padding="0dp"
-                android:layout_marginEnd="6dp"
-                style="@style/Widget.MaterialComponents.Button"/>
-
-            <Button
-                android:id="@+id/btn_float_pan_right"
-                android:layout_width="44dp"
-                android:layout_height="44dp"
-                android:text="▶"
-                android:textSize="16sp"
-                android:textColor="#FFFFFF"
-                android:backgroundTint="#33FFFFFF"
-                android:padding="0dp"
-                style="@style/Widget.MaterialComponents.Button"/>
-
-        </LinearLayout>
-
-        <!-- Arrow Down -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center"
-            android:layout_marginBottom="4dp">
-            <Button
-                android:id="@+id/btn_float_pan_down"
-                android:layout_width="44dp"
-                android:layout_height="44dp"
-                android:text="▼"
-                android:textSize="16sp"
-                android:textColor="#FFFFFF"
-                android:backgroundTint="#33FFFFFF"
-                android:padding="0dp"
-                style="@style/Widget.MaterialComponents.Button"/>
         </LinearLayout>
 
     </LinearLayout>
