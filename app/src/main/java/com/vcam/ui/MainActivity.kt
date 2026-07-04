@@ -46,7 +46,7 @@ class MainActivity : AppCompatActivity() {
                 MediaSlotManager.setSlot(this@MainActivity, slot, uri, isVideo)
             }
             refreshSlotUI(slot)
-            binding.btnStartStop.isEnabled = MediaSlotManager.isSlotSet(this, 1)
+            binding.btnStartStop.isEnabled = MediaSlotManager.isSlotSet(this@MainActivity, 1)
         }
     }
 
