@@ -45,8 +45,8 @@ class CameraInjector(
         const val TARGET_W = 1280
         const val TARGET_H = 720
 
-        // Re-render poll interval for image mode (real-time feel)
-        private const val RENDER_POLL_MS = 80L
+        // Re-render poll interval for image mode (fast response)
+        private const val RENDER_POLL_MS = 25L
 
         init {
             try { System.loadLibrary("vcam_native") }
@@ -134,9 +134,9 @@ class CameraInjector(
     /**
      * For the VcplaxEngine path: monitor transform changes and apply in real-time.
      *
-     * For images: ANY transform change (rotation, mirror, zoom, scale, pan) triggers
-     * a full re-render of the bitmap → temp file → switchSource. This guarantees
-     * every button press is reflected immediately without needing to change the image.
+     * For images: rotation/mirror are applied via Binder (instant, no re-render).
+     * Spatial transforms (zoom, scale, pan) trigger a re-render of the cached
+     * bitmap → temp file → switchSource. The raw bitmap is loaded ONCE and reused.
      *
      * For video: rotation/mirror applied via Binder; spatial transforms skipped
      * (vcplax handles the video stream directly).
@@ -146,39 +146,40 @@ class CameraInjector(
     private suspend fun monitorVcplaxTransforms() = withContext(Dispatchers.IO) {
         resetLastRendered()
 
+        // Cache the raw bitmap for image mode so zoom/scale/pan don't reload from disk
+        val cachedBitmap: Bitmap? = if (!isVideo) loadBitmapForInjection(mediaPath) else null
+
         // Force an initial render so the first frame is correct
         var firstRender = true
 
+        try {
         while (running) {
             val z  = zoomFactor;  val s  = frameFillScale
             val px = panX;        val py = panY
             val r  = rotation;    val m  = mirror
 
             if (firstRender || !transformsMatch(z, s, px, py, r, m)) {
-                firstRender = false
-
                 if (!isVideo) {
-                    // For images: always re-render via switchSource on ANY transform change.
-                    // This ensures rotation, mirror, zoom, scale, and pan all apply instantly.
-                    val needsTransform = (r != 0 || m || z != 1f || s != 1f || px != 0 || py != 0)
-                    val sourcePath: String? = if (needsTransform) {
-                        val rawBmp = loadBitmapForInjection(mediaPath)
-                        if (rawBmp != null) {
-                            val transformed = applyTransformsWithValues(rawBmp, r, m, z, s, px, py)
-                            val tp = writeTempBitmap(transformed)
-                            if (transformed !== rawBmp) transformed.recycle()
-                            rawBmp.recycle()
-                            tp
-                        } else null
-                    } else {
-                        mediaPath
+                    // Apply rotation/mirror via Binder (instant, no re-render needed)
+                    if (firstRender || r != lastRenderedRotation) {
+                        VcplaxEngine.setRotation(r)
+                    }
+                    if (firstRender || m != lastRenderedMirror) {
+                        VcplaxEngine.setMirror(m)
                     }
 
-                    if (sourcePath != null) {
-                        try {
-                            VcplaxEngine.getProxy()?.switchSource(sourcePath, if (isVideo) 2 else 1)
-                        } catch (e: Exception) {
-                            Log.w(TAG, "switchSource failed: ${e.message}")
+                    // Only re-render via switchSource for spatial transforms (zoom/scale/pan)
+                    val needsSpatial = (z != 1f || s != 1f || px != 0 || py != 0)
+                    if (needsSpatial && cachedBitmap != null) {
+                        val transformed = applyTransformsWithValues(cachedBitmap, 0, false, z, s, px, py)
+                        val tp = writeTempBitmap(transformed)
+                        if (transformed !== cachedBitmap) transformed.recycle()
+                        if (tp != null) {
+                            try {
+                                VcplaxEngine.getProxy()?.switchSource(tp, 1)
+                            } catch (e: Exception) {
+                                Log.w(TAG, "switchSource failed: ${e.message}")
+                            }
                         }
                     }
                 } else {
@@ -187,10 +188,14 @@ class CameraInjector(
                     VcplaxEngine.setMirror(m)
                 }
 
+                firstRender = false
                 updateLastRendered(z, s, px, py, r, m)
             }
 
             delay(RENDER_POLL_MS)
+        }
+        } finally {
+            cachedBitmap?.recycle()
         }
     }
 
@@ -293,7 +298,7 @@ class CameraInjector(
 
     /**
      * Real-time image streaming: re-renders whenever any transform parameter changes.
-     * Polls every RENDER_POLL_MS ms — changes apply within ~80ms.
+     * Polls every RENDER_POLL_MS ms — changes apply within ~25ms.
      *
      * The raw bitmap is loaded ONCE at startup (at a safe sample size),
      * then re-transformed in the loop on every change — no repeated disk I/O.
@@ -436,11 +441,20 @@ class CameraInjector(
             } else bmp
 
             val dir = File(context.cacheDir, "vcam_tmp").also { it.mkdirs() }
-            val f   = File(dir, "transformed_frame.jpg")
+            // Use a unique filename per render so vcplax doesn't cache stale content
+            val f   = File(dir, "transformed_frame_${System.nanoTime()}.jpg")
             java.io.FileOutputStream(f).use { out ->
                 opaque.compress(Bitmap.CompressFormat.JPEG, 95, out)
             }
             if (opaque !== bmp) opaque.recycle()
+            // Clean up old temp files (keep only the latest 3)
+            try {
+                dir.listFiles()
+                    ?.filter { it.name.startsWith("transformed_frame_") && it.name != f.name }
+                    ?.sortedByDescending { it.lastModified() }
+                    ?.drop(3)
+                    ?.forEach { it.delete() }
+            } catch (_: Exception) {}
             f.absolutePath
         } catch (e: Exception) {
             Log.e(TAG, "writeTempBitmap failed: ${e.message}")

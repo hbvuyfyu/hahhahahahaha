@@ -388,8 +388,8 @@ class FloatWindowService : Service() {
     }
 
     private fun animateBounce(v: View) {
-        v.animate().scaleX(0.8f).scaleY(0.8f).setDuration(80)
-            .withEndAction { v.animate().scaleX(1f).scaleY(1f).setDuration(120).start() }
+        v.animate().scaleX(0.85f).scaleY(0.85f).setDuration(40)
+            .withEndAction { v.animate().scaleX(1f).scaleY(1f).setDuration(60).start() }
             .start()
     }
 
