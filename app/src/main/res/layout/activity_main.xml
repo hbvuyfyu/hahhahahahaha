@@ -83,9 +83,9 @@
                 <!-- SLOT 1 -->
                 <FrameLayout
                     android:layout_width="0dp"
-                    android:layout_height="0dp"
+                    android:layout_height="160dp"
                     app:layout_columnWeight="1"
-                    app:layout_rowWeight="1"
+                    app:layout_rowWeight="0"
                     app:layout_gravity="fill"
                     android:layout_margin="6dp">
                     <androidx.cardview.widget.CardView
@@ -180,9 +180,9 @@
                 <!-- SLOT 2 -->
                 <FrameLayout
                     android:layout_width="0dp"
-                    android:layout_height="0dp"
+                    android:layout_height="160dp"
                     app:layout_columnWeight="1"
-                    app:layout_rowWeight="1"
+                    app:layout_rowWeight="0"
                     app:layout_gravity="fill"
                     android:layout_margin="6dp">
                     <androidx.cardview.widget.CardView
@@ -277,9 +277,9 @@
                 <!-- SLOT 3 -->
                 <FrameLayout
                     android:layout_width="0dp"
-                    android:layout_height="0dp"
+                    android:layout_height="160dp"
                     app:layout_columnWeight="1"
-                    app:layout_rowWeight="1"
+                    app:layout_rowWeight="0"
                     app:layout_gravity="fill"
                     android:layout_margin="6dp">
                     <androidx.cardview.widget.CardView
@@ -374,9 +374,9 @@
                 <!-- SLOT 4 -->
                 <FrameLayout
                     android:layout_width="0dp"
-                    android:layout_height="0dp"
+                    android:layout_height="160dp"
                     app:layout_columnWeight="1"
-                    app:layout_rowWeight="1"
+                    app:layout_rowWeight="0"
                     app:layout_gravity="fill"
                     android:layout_margin="6dp">
                     <androidx.cardview.widget.CardView
@@ -492,9 +492,9 @@
                 <!-- SLOT 5 -->
                 <FrameLayout
                     android:layout_width="0dp"
-                    android:layout_height="0dp"
+                    android:layout_height="160dp"
                     app:layout_columnWeight="1"
-                    app:layout_rowWeight="1"
+                    app:layout_rowWeight="0"
                     app:layout_gravity="fill"
                     android:layout_margin="6dp">
                     <androidx.cardview.widget.CardView
@@ -578,9 +578,9 @@
                 <!-- SLOT 6 -->
                 <FrameLayout
                     android:layout_width="0dp"
-                    android:layout_height="0dp"
+                    android:layout_height="160dp"
                     app:layout_columnWeight="1"
-                    app:layout_rowWeight="1"
+                    app:layout_rowWeight="0"
                     app:layout_gravity="fill"
                     android:layout_margin="6dp">
                     <androidx.cardview.widget.CardView
@@ -664,9 +664,9 @@
                 <!-- SLOT 7 -->
                 <FrameLayout
                     android:layout_width="0dp"
-                    android:layout_height="0dp"
+                    android:layout_height="160dp"
                     app:layout_columnWeight="1"
-                    app:layout_rowWeight="1"
+                    app:layout_rowWeight="0"
                     app:layout_gravity="fill"
                     android:layout_margin="6dp">
                     <androidx.cardview.widget.CardView
@@ -750,9 +750,9 @@
                 <!-- SLOT 8 -->
                 <FrameLayout
                     android:layout_width="0dp"
-                    android:layout_height="0dp"
+                    android:layout_height="160dp"
                     app:layout_columnWeight="1"
-                    app:layout_rowWeight="1"
+                    app:layout_rowWeight="0"
                     app:layout_gravity="fill"
                     android:layout_margin="6dp">
                     <androidx.cardview.widget.CardView
