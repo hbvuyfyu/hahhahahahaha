@@ -6,11 +6,12 @@
     android:layout_height="match_parent"
     android:background="@color/color_primary_dark">
 
+    <!-- Full-screen zoomable image -->
     <ImageView
-        android:id="@+id/iv_preview"
+        android:id="@+id/iv_preview_image"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:scaleType="fitCenter"
+        android:scaleType="matrix"
         android:background="@color/color_primary_dark"
         android:contentDescription="Preview"
         app:layout_constraintTop_toTopOf="parent"
@@ -18,7 +19,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 
-    <!-- Top controls bar -->
+    <!-- Top bar -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="56dp"
@@ -32,7 +33,7 @@
         app:layout_constraintEnd_toEndOf="parent">
 
         <ImageButton
-            android:id="@+id/btn_close"
+            android:id="@+id/btn_preview_close"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:src="@drawable/ic_close"
@@ -42,16 +43,69 @@
             android:contentDescription="Close"/>
 
         <TextView
+            android:id="@+id/tv_preview_slot_label"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/media_preview"
+            android:text="معاينة"
             android:textColor="@color/color_text_primary"
             android:textSize="15sp"
             android:textStyle="bold"
             android:gravity="center"/>
 
-        <View android:layout_width="40dp" android:layout_height="40dp"/>
+        <TextView
+            android:id="@+id/tv_preview_zoom"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="100%"
+            android:textColor="@color/color_accent"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            android:minWidth="40dp"
+            android:gravity="center"/>
+
+    </LinearLayout>
+
+    <!-- Bottom zoom controls -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:background="@color/color_overlay_dark"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
+        android:layout_marginBottom="24dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_preview_zoom_out"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:text="−"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="@color/white"
+            android:padding="0dp"
+            android:backgroundTint="@color/color_card_elevated"
+            android:layout_marginEnd="16dp"
+            app:cornerRadius="24dp"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_preview_zoom_in"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:text="+"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="@color/white"
+            android:padding="0dp"
+            android:backgroundTint="@color/color_accent"
+            app:cornerRadius="24dp"/>
 
     </LinearLayout>
 
