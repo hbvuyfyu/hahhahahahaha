@@ -1,5 +1,6 @@
 package com.vcam.ui
 
+import android.animation.ObjectAnimator
 import android.content.Intent
 import android.graphics.Bitmap
 import android.net.Uri
@@ -7,6 +8,7 @@ import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.view.View
+import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -186,13 +188,24 @@ class MainActivity : AppCompatActivity() {
             R.id.btn_rotate_slot_3 to 3,
             R.id.btn_rotate_slot_4 to 4,
         ).forEach { (btnId, slot) ->
-            binding.root.findViewById<ImageButton>(btnId)?.setOnClickListener {
+            val btn = binding.root.findViewById<ImageButton>(btnId) ?: return@forEach
+            btn.setOnClickListener {
                 if (!MediaSlotManager.isSlotSet(this, slot)) return@setOnClickListener
+                if (btn.tag == "rotating") return@setOnClickListener
+                btn.tag = "rotating"
+                val currentDeg = MediaSlotManager.getSlotRotation(this, slot).toFloat()
+                val targetDeg = currentDeg + 90f
+                val animator = ObjectAnimator.ofFloat(btn, "rotation", currentDeg % 360f, targetDeg % 360f)
+                animator.duration = 260
+                animator.interpolator = AccelerateDecelerateInterpolator()
+                animator.start()
                 lifecycleScope.launch {
                     val newDeg = withContext(Dispatchers.IO) {
                         MediaSlotManager.rotateSlot(this@MainActivity, slot)
                     }
                     refreshSlotUI(slot)
+                    btn.rotation = 0f
+                    btn.tag = null
                     showSnack("الحقل $slot — تدوير ${newDeg}°")
                 }
             }

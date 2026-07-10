@@ -5,17 +5,15 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content">
 
-    <!-- ══════════════════════════════════════════════
-         EXPANDED PANEL  (visible when isExpanded=true)
-         ══════════════════════════════════════════════ -->
+    <!-- EXPANDED PANEL -->
     <LinearLayout
         android:id="@+id/float_expanded_panel"
-        android:layout_width="240dp"
+        android:layout_width="230dp"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:background="#F0050510"
-        android:padding="10dp"
-        android:elevation="12dp"
+        android:background="@drawable/bg_float_panel"
+        android:padding="12dp"
+        android:elevation="16dp"
         android:visibility="gone"
         android:layout_marginBottom="64dp">
 
@@ -26,20 +24,20 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="center_vertical"
-            android:paddingBottom="8dp">
+            android:paddingBottom="10dp">
 
             <View
                 android:layout_width="8dp"
                 android:layout_height="8dp"
                 android:background="@drawable/bg_status_dot"
-                android:layout_marginEnd="6dp"/>
+                android:layout_marginEnd="8dp"/>
 
             <TextView
                 android:id="@+id/tv_float_target"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:textColor="#FFFFFF"
+                android:textColor="@color/color_text_primary"
                 android:textSize="11sp"
                 android:maxLines="1"
                 android:text="VCam Active"/>
@@ -48,51 +46,21 @@
                 android:id="@+id/tv_float_type"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="#4F8EF7"
+                android:textColor="@color/color_silver_dark"
                 android:textSize="10sp"
-                android:paddingStart="4dp"
-                android:text="📷 1"/>
+                android:maxLines="1"
+                android:layout_marginStart="6dp"/>
+
         </LinearLayout>
 
-        <!-- ══ MODE TABS (Images / Videos) ══ -->
-        <LinearLayout
+        <!-- Divider -->
+        <View
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center"
-            android:layout_marginBottom="6dp">
+            android:layout_height="1dp"
+            android:background="@color/color_divider"
+            android:layout_marginBottom="10dp"/>
 
-            <TextView
-                android:id="@+id/btn_tab_images"
-                android:layout_width="0dp"
-                android:layout_height="32dp"
-                android:layout_weight="1"
-                android:text="📷 صور"
-                android:gravity="center"
-                android:textColor="#FFFFFF"
-                android:textSize="11sp"
-                android:textStyle="bold"
-                android:background="@drawable/bg_slot_btn_active"
-                android:layout_marginEnd="3dp"
-                android:clickable="true"
-                android:focusable="true"/>
-
-            <TextView
-                android:id="@+id/btn_tab_videos"
-                android:layout_width="0dp"
-                android:layout_height="32dp"
-                android:layout_weight="1"
-                android:text="🎬 فيديو"
-                android:gravity="center"
-                android:textColor="#AAAAAA"
-                android:textSize="11sp"
-                android:textStyle="bold"
-                android:background="@drawable/bg_slot_btn_inactive"
-                android:clickable="true"
-                android:focusable="true"/>
-        </LinearLayout>
-
-        <!-- Slot switcher row (4 slots — dynamically images 1-4 or videos 5-8) -->
+        <!-- Slot buttons row 1-4 (images) -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -101,484 +69,207 @@
             android:layout_marginBottom="8dp">
 
             <TextView
-                android:id="@+id/btn_slot_1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="IMG"
+                android:textColor="@color/color_silver_dark"
+                android:textSize="9sp"
+                android:textStyle="bold"
+                android:letterSpacing="0.06"
+                android:layout_marginEnd="8dp"/>
+
+            <Button
+                android:id="@+id/btn_float_slot_1"
                 android:layout_width="34dp"
                 android:layout_height="34dp"
                 android:text="1"
-                android:gravity="center"
-                android:textColor="#FFFFFF"
-                android:textSize="13sp"
+                android:textSize="11sp"
                 android:textStyle="bold"
-                android:background="@drawable/bg_slot_btn_active"
-                android:layout_marginEnd="4dp"
-                android:clickable="true"
-                android:focusable="true"/>
+                android:padding="0dp"
+                android:backgroundTint="@color/color_card_elevated"
+                android:textColor="@color/color_text_secondary"
+                android:layout_marginEnd="4dp"/>
 
-            <TextView
-                android:id="@+id/btn_slot_2"
+            <Button
+                android:id="@+id/btn_float_slot_2"
                 android:layout_width="34dp"
                 android:layout_height="34dp"
                 android:text="2"
-                android:gravity="center"
-                android:textColor="#AAAAAA"
-                android:textSize="13sp"
+                android:textSize="11sp"
                 android:textStyle="bold"
-                android:background="@drawable/bg_slot_btn_inactive"
-                android:layout_marginEnd="4dp"
-                android:clickable="true"
-                android:focusable="true"/>
+                android:padding="0dp"
+                android:backgroundTint="@color/color_card_elevated"
+                android:textColor="@color/color_text_secondary"
+                android:layout_marginEnd="4dp"/>
 
-            <TextView
-                android:id="@+id/btn_slot_3"
+            <Button
+                android:id="@+id/btn_float_slot_3"
                 android:layout_width="34dp"
                 android:layout_height="34dp"
                 android:text="3"
-                android:gravity="center"
-                android:textColor="#AAAAAA"
-                android:textSize="13sp"
+                android:textSize="11sp"
                 android:textStyle="bold"
-                android:background="@drawable/bg_slot_btn_inactive"
-                android:layout_marginEnd="4dp"
-                android:clickable="true"
-                android:focusable="true"/>
+                android:padding="0dp"
+                android:backgroundTint="@color/color_card_elevated"
+                android:textColor="@color/color_text_secondary"
+                android:layout_marginEnd="4dp"/>
 
-            <TextView
-                android:id="@+id/btn_slot_4"
+            <Button
+                android:id="@+id/btn_float_slot_4"
                 android:layout_width="34dp"
                 android:layout_height="34dp"
                 android:text="4"
-                android:gravity="center"
-                android:textColor="#AAAAAA"
-                android:textSize="13sp"
+                android:textSize="11sp"
                 android:textStyle="bold"
-                android:background="@drawable/bg_slot_btn_inactive"
-                android:clickable="true"
-                android:focusable="true"/>
+                android:padding="0dp"
+                android:backgroundTint="@color/color_card_elevated"
+                android:textColor="@color/color_text_secondary"/>
+
+        </LinearLayout>
+
+        <!-- Slot buttons row 5-8 (videos) -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_marginBottom="10dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="VID"
+                android:textColor="@color/color_video_accent"
+                android:textSize="9sp"
+                android:textStyle="bold"
+                android:letterSpacing="0.06"
+                android:layout_marginEnd="8dp"/>
+
+            <Button
+                android:id="@+id/btn_float_slot_5"
+                android:layout_width="34dp"
+                android:layout_height="34dp"
+                android:text="5"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:padding="0dp"
+                android:backgroundTint="@color/color_video_accent_bg"
+                android:textColor="@color/color_video_accent"
+                android:layout_marginEnd="4dp"/>
+
+            <Button
+                android:id="@+id/btn_float_slot_6"
+                android:layout_width="34dp"
+                android:layout_height="34dp"
+                android:text="6"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:padding="0dp"
+                android:backgroundTint="@color/color_video_accent_bg"
+                android:textColor="@color/color_video_accent"
+                android:layout_marginEnd="4dp"/>
+
+            <Button
+                android:id="@+id/btn_float_slot_7"
+                android:layout_width="34dp"
+                android:layout_height="34dp"
+                android:text="7"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:padding="0dp"
+                android:backgroundTint="@color/color_video_accent_bg"
+                android:textColor="@color/color_video_accent"
+                android:layout_marginEnd="4dp"/>
+
+            <Button
+                android:id="@+id/btn_float_slot_8"
+                android:layout_width="34dp"
+                android:layout_height="34dp"
+                android:text="8"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:padding="0dp"
+                android:backgroundTint="@color/color_video_accent_bg"
+                android:textColor="@color/color_video_accent"/>
+
         </LinearLayout>
 
         <!-- Divider -->
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
-            android:background="#222244"
-            android:layout_marginBottom="8dp"/>
+            android:background="@color/color_divider"
+            android:layout_marginBottom="10dp"/>
 
-        <!-- ══ FIRST ROW: main action buttons (always visible) ══ -->
+        <!-- Mirror + Stop row -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:gravity="center">
+            android:gravity="center"
+            android:layout_marginBottom="6dp">
 
-            <!-- Preview -->
+            <ImageButton
+                android:id="@+id/btn_float_mirror"
+                android:layout_width="38dp"
+                android:layout_height="38dp"
+                android:src="@drawable/ic_mirror"
+                android:background="@drawable/bg_action_btn_accent"
+                android:tint="@color/white"
+                android:padding="9dp"
+                android:layout_marginEnd="8dp"
+                android:contentDescription="Mirror"/>
+
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:orientation="vertical"
-                android:gravity="center">
-                <ImageButton
-                    android:id="@+id/btn_float_preview"
-                    android:layout_width="44dp"
-                    android:layout_height="44dp"
-                    android:src="@drawable/ic_eye"
-                    android:background="@drawable/bg_fab_action"
-                    android:padding="10dp"
-                    android:contentDescription="Preview"/>
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="معاينة"
-                    android:textColor="#888888"
-                    android:textSize="9sp"
-                    android:layout_marginTop="3dp"/>
-            </LinearLayout>
-
-            <!-- Rotate -->
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical"
-                android:gravity="center">
-                <ImageButton
-                    android:id="@+id/btn_float_rotate"
-                    android:layout_width="44dp"
-                    android:layout_height="44dp"
-                    android:src="@drawable/ic_rotate_cw"
-                    android:background="@drawable/bg_fab_action"
-                    android:padding="10dp"
-                    android:contentDescription="Rotate 90°"/>
-                <TextView
-                    android:id="@+id/tv_rotate_label"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="0°"
-                    android:textColor="#4F8EF7"
-                    android:textSize="9sp"
-                    android:layout_marginTop="3dp"/>
-            </LinearLayout>
-
-            <!-- Mirror -->
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical"
-                android:gravity="center">
-                <ImageButton
-                    android:id="@+id/btn_float_mirror"
-                    android:layout_width="44dp"
-                    android:layout_height="44dp"
-                    android:src="@drawable/ic_mirror"
-                    android:background="@drawable/bg_fab_action"
-                    android:padding="10dp"
-                    android:alpha="0.45"
-                    android:contentDescription="Mirror"/>
-                <TextView
-                    android:id="@+id/tv_mirror_label"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="عكس"
-                    android:textColor="#888888"
-                    android:textSize="9sp"
-                    android:layout_marginTop="3dp"/>
-            </LinearLayout>
-
-            <!-- Stop -->
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical"
-                android:gravity="center">
-                <ImageButton
-                    android:id="@+id/btn_float_stop"
-                    android:layout_width="44dp"
-                    android:layout_height="44dp"
-                    android:src="@drawable/ic_power_off"
-                    android:background="@drawable/bg_fab_action"
-                    android:padding="10dp"
-                    android:contentDescription="Stop VCam"/>
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="إيقاف"
-                    android:textColor="#EF4444"
-                    android:textSize="9sp"
-                    android:layout_marginTop="3dp"/>
-            </LinearLayout>
-
-        </LinearLayout>
-
-        <!-- ══ EXPAND/COLLAPSE ARROW BUTTON ══ -->
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="#222244"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="4dp"/>
-
-        <Button
-            android:id="@+id/btn_float_expand"
-            android:layout_width="match_parent"
-            android:layout_height="32dp"
-            android:text="▼ المزيد من الأزرار"
-            android:textSize="10sp"
-            android:textColor="#4F8EF7"
-            android:backgroundTint="#224F8EF7"
-            android:padding="0dp"
-            style="@style/Widget.MaterialComponents.Button"/>
-
-        <!-- ══ EXPANDABLE SECTION: zoom / scale / pan (hidden until expanded) ══ -->
-        <LinearLayout
-            android:id="@+id/float_extra_controls"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:visibility="gone"
-            android:layout_marginTop="6dp">
-
-            <!-- ══ ZOOM controls (تقريب / تبعيد) ══ -->
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="الزوم"
-                android:textColor="#888888"
-                android:textSize="9sp"
-                android:textAllCaps="true"
-                android:gravity="center"
-                android:layout_marginBottom="6dp"/>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center"
-                android:layout_marginBottom="4dp">
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical"
-                    android:gravity="center">
-                    <Button
-                        android:id="@+id/btn_float_zoom_out"
-                        android:layout_width="44dp"
-                        android:layout_height="44dp"
-                        android:text="−"
-                        android:textSize="20sp"
-                        android:textColor="#FFFFFF"
-                        android:backgroundTint="#33FFFFFF"
-                        android:padding="0dp"
-                        style="@style/Widget.MaterialComponents.Button"/>
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="تبعيد"
-                        android:textColor="#888888"
-                        android:textSize="9sp"
-                        android:layout_marginTop="3dp"/>
-                </LinearLayout>
+                android:orientation="vertical">
 
                 <TextView
-                    android:id="@+id/tv_float_zoom_label"
-                    android:layout_width="0dp"
+                    android:id="@+id/tv_float_mirror"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="1.0×"
-                    android:textColor="#4F8EF7"
-                    android:textSize="11sp"
-                    android:gravity="center"/>
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical"
-                    android:gravity="center">
-                    <Button
-                        android:id="@+id/btn_float_zoom_in"
-                        android:layout_width="44dp"
-                        android:layout_height="44dp"
-                        android:text="+"
-                        android:textSize="20sp"
-                        android:textColor="#FFFFFF"
-                        android:backgroundTint="#334F8EF7"
-                        android:padding="0dp"
-                        style="@style/Widget.MaterialComponents.Button"/>
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="تقريب"
-                        android:textColor="#888888"
-                        android:textSize="9sp"
-                        android:layout_marginTop="3dp"/>
-                </LinearLayout>
-            </LinearLayout>
-
-            <!-- ══ SCALE controls (تكبير / تصغير) ══ -->
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="#222244"
-                android:layout_marginTop="4dp"
-                android:layout_marginBottom="8dp"/>
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="الحجم"
-                android:textColor="#888888"
-                android:textSize="9sp"
-                android:textAllCaps="true"
-                android:gravity="center"
-                android:layout_marginBottom="6dp"/>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center"
-                android:layout_marginBottom="4dp">
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical"
-                    android:gravity="center">
-                    <Button
-                        android:id="@+id/btn_float_scale_down"
-                        android:layout_width="44dp"
-                        android:layout_height="44dp"
-                        android:text="⊖"
-                        android:textSize="18sp"
-                        android:textColor="#FFFFFF"
-                        android:backgroundTint="#33FFFFFF"
-                        android:padding="0dp"
-                        style="@style/Widget.MaterialComponents.Button"/>
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="تصغير"
-                        android:textColor="#888888"
-                        android:textSize="9sp"
-                        android:layout_marginTop="3dp"/>
-                </LinearLayout>
+                    android:text="@string/mirror_off"
+                    android:textColor="@color/color_text_secondary"
+                    android:textSize="10sp"
+                    android:gravity="start"/>
 
                 <TextView
-                    android:id="@+id/tv_float_scale_label"
-                    android:layout_width="0dp"
+                    android:id="@+id/tv_float_slot"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="100%"
-                    android:textColor="#4F8EF7"
-                    android:textSize="11sp"
-                    android:gravity="center"/>
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical"
-                    android:gravity="center">
-                    <Button
-                        android:id="@+id/btn_float_scale_up"
-                        android:layout_width="44dp"
-                        android:layout_height="44dp"
-                        android:text="⊕"
-                        android:textSize="18sp"
-                        android:textColor="#FFFFFF"
-                        android:backgroundTint="#3322C55E"
-                        android:padding="0dp"
-                        style="@style/Widget.MaterialComponents.Button"/>
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="تكبير"
-                        android:textColor="#888888"
-                        android:textSize="9sp"
-                        android:layout_marginTop="3dp"/>
-                </LinearLayout>
+                    android:text="حقل 1"
+                    android:textColor="@color/color_accent"
+                    android:textSize="10sp"
+                    android:gravity="start"/>
             </LinearLayout>
 
-            <!-- ══ PAN ARROWS (أسهم التحريك) ══ -->
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="#222244"
-                android:layout_marginTop="4dp"
-                android:layout_marginBottom="8dp"/>
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="التحريك (حر — غير مقيد بالإطار)"
-                android:textColor="#888888"
-                android:textSize="9sp"
-                android:textAllCaps="true"
-                android:gravity="center"
-                android:layout_marginBottom="6dp"/>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center"
-                android:layout_marginBottom="2dp">
-                <Button
-                    android:id="@+id/btn_float_pan_up"
-                    android:layout_width="44dp"
-                    android:layout_height="44dp"
-                    android:text="▲"
-                    android:textSize="16sp"
-                    android:textColor="#FFFFFF"
-                    android:backgroundTint="#33FFFFFF"
-                    android:padding="0dp"
-                    style="@style/Widget.MaterialComponents.Button"/>
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center"
-                android:layout_marginBottom="2dp">
-
-                <Button
-                    android:id="@+id/btn_float_pan_left"
-                    android:layout_width="44dp"
-                    android:layout_height="44dp"
-                    android:text="◀"
-                    android:textSize="16sp"
-                    android:textColor="#FFFFFF"
-                    android:backgroundTint="#33FFFFFF"
-                    android:padding="0dp"
-                    android:layout_marginEnd="6dp"
-                    style="@style/Widget.MaterialComponents.Button"/>
-
-                <Button
-                    android:id="@+id/btn_float_pan_reset"
-                    android:layout_width="44dp"
-                    android:layout_height="44dp"
-                    android:text="⌖"
-                    android:textSize="16sp"
-                    android:textColor="#AAAAAA"
-                    android:backgroundTint="#22FFFFFF"
-                    android:padding="0dp"
-                    android:layout_marginEnd="6dp"
-                    style="@style/Widget.MaterialComponents.Button"/>
-
-                <Button
-                    android:id="@+id/btn_float_pan_right"
-                    android:layout_width="44dp"
-                    android:layout_height="44dp"
-                    android:text="▶"
-                    android:textSize="16sp"
-                    android:textColor="#FFFFFF"
-                    android:backgroundTint="#33FFFFFF"
-                    android:padding="0dp"
-                    style="@style/Widget.MaterialComponents.Button"/>
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center"
-                android:layout_marginBottom="4dp">
-                <Button
-                    android:id="@+id/btn_float_pan_down"
-                    android:layout_width="44dp"
-                    android:layout_height="44dp"
-                    android:text="▼"
-                    android:textSize="16sp"
-                    android:textColor="#FFFFFF"
-                    android:backgroundTint="#33FFFFFF"
-                    android:padding="0dp"
-                    style="@style/Widget.MaterialComponents.Button"/>
-            </LinearLayout>
+            <ImageButton
+                android:id="@+id/btn_float_stop"
+                android:layout_width="38dp"
+                android:layout_height="38dp"
+                android:src="@drawable/ic_power_off"
+                android:background="@drawable/bg_action_btn_stop"
+                android:tint="@color/white"
+                android:padding="9dp"
+                android:contentDescription="Stop"/>
 
         </LinearLayout>
 
     </LinearLayout>
 
-    <!-- ══════════════════════════════════════════
-         MAIN FAB BUBBLE  (always visible, draggable)
-         ══════════════════════════════════════════ -->
-    <ImageView
-        android:id="@+id/float_fab_main"
-        android:layout_width="56dp"
-        android:layout_height="56dp"
-        android:src="@drawable/ic_camera_launcher"
+    <!-- FAB bubble (always visible) -->
+    <ImageButton
+        android:id="@+id/btn_float_toggle"
+        android:layout_width="54dp"
+        android:layout_height="54dp"
+        android:src="@drawable/ic_vcam_notif"
         android:background="@drawable/bg_fab_main"
-        android:padding="10dp"
-        android:elevation="20dp"
-        android:layout_gravity="bottom|start"
-        android:clickable="true"
-        android:focusable="true"
-        android:contentDescription="VCam Controls"/>
+        android:tint="@color/color_accent"
+        android:padding="14dp"
+        android:elevation="8dp"
+        android:layout_gravity="bottom|end"
+        android:contentDescription="Toggle panel"/>
 
 </FrameLayout>

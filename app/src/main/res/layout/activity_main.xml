@@ -5,56 +5,79 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#000000">
+    android:background="@color/color_background">
 
-    <!-- Top bar -->
+    <!-- ══ TOP HEADER BAR ══ -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="56dp"
+        android:layout_height="64dp"
         android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:background="#000000"
-        android:paddingStart="20dp"
-        android:paddingEnd="20dp">
+        android:background="@color/color_primary_dark"
+        android:paddingStart="18dp"
+        android:paddingEnd="18dp"
+        android:elevation="4dp">
 
         <ImageView
-            android:layout_width="28dp"
-            android:layout_height="28dp"
+            android:layout_width="34dp"
+            android:layout_height="34dp"
             android:src="@drawable/ic_camera_launcher"
-            android:tint="#4F8EF7"
+            android:tint="@color/color_accent"
             android:contentDescription="Logo"
-            android:layout_marginEnd="10dp"/>
+            android:layout_marginEnd="12dp"/>
 
-        <TextView
+        <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Virtual Cam"
-            android:textColor="#FFFFFF"
-            android:textSize="20sp"
-            android:textStyle="bold"/>
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Virtual Cam"
+                android:textColor="@color/color_text_primary"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:letterSpacing="0.04"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Camera Injection Studio"
+                android:textColor="@color/color_silver_dark"
+                android:textSize="10sp"
+                android:letterSpacing="0.06"/>
+
+        </LinearLayout>
 
         <TextView
             android:id="@+id/tv_root_status"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Root"
-            android:textSize="12sp"
-            android:textColor="#22C55E"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:textColor="@color/color_root_ok"
             android:background="@drawable/bg_status_dot"
-            android:paddingStart="10dp"
-            android:paddingEnd="10dp"
-            android:paddingTop="4dp"
-            android:paddingBottom="4dp"/>
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp"/>
     </LinearLayout>
 
-    <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#1A1A1A"/>
+    <!-- Header bottom border -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/color_divider"/>
 
-    <!-- Main scrollable content -->
+    <!-- ══ MAIN SCROLLABLE CONTENT ══ -->
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1">
+        android:layout_weight="1"
+        android:overScrollMode="never">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -62,17 +85,100 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <!-- Section: Images -->
-            <TextView
+            <!-- ══ BANNER / HERO CARD ══ -->
+            <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="📷  الصور"
-                android:textColor="#FFFFFF"
-                android:textSize="15sp"
-                android:textStyle="bold"
-                android:layout_marginBottom="10dp"/>
+                android:layout_marginBottom="20dp"
+                app:cardCornerRadius="16dp"
+                app:cardBackgroundColor="@color/color_card_bg"
+                app:cardElevation="6dp">
 
-            <!-- 2x2 grid of image squares -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:padding="16dp">
+
+                    <LinearLayout
+                        android:layout_width="52dp"
+                        android:layout_height="52dp"
+                        android:gravity="center"
+                        android:background="@drawable/bg_icon_circle_accent"
+                        android:layout_marginEnd="14dp">
+                        <ImageView
+                            android:layout_width="28dp"
+                            android:layout_height="28dp"
+                            android:src="@drawable/ic_target"
+                            android:tint="@color/color_accent"
+                            android:contentDescription="Status"/>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/start_hint"
+                            android:textColor="@color/color_text_secondary"
+                            android:textSize="12sp"
+                            android:lineSpacingExtra="4dp"/>
+                    </LinearLayout>
+
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- ══ SECTION: IMAGES ══ -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="12dp">
+
+                <View
+                    android:layout_width="4dp"
+                    android:layout_height="18dp"
+                    android:background="@drawable/bg_section_indicator"
+                    android:layout_marginEnd="10dp"/>
+
+                <ImageView
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
+                    android:src="@drawable/ic_image"
+                    android:tint="@color/color_accent"
+                    android:contentDescription="Images"
+                    android:layout_marginEnd="8dp"/>
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="الصور"
+                    android:textColor="@color/color_text_primary"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:letterSpacing="0.03"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="4 حقول"
+                    android:textColor="@color/color_silver_dark"
+                    android:textSize="11sp"
+                    android:background="@drawable/bg_badge_count"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"
+                    android:paddingTop="3dp"
+                    android:paddingBottom="3dp"/>
+
+            </LinearLayout>
+
+            <!-- 2x2 grid of image slots -->
             <androidx.gridlayout.widget.GridLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -87,14 +193,14 @@
                     app:layout_columnWeight="1"
                     app:layout_rowWeight="0"
                     app:layout_gravity="fill"
-                    android:layout_margin="6dp">
+                    android:layout_margin="5dp">
                     <androidx.cardview.widget.CardView
                         android:id="@+id/card_slot_1"
                         android:layout_width="match_parent"
                         android:layout_height="160dp"
                         app:cardCornerRadius="14dp"
-                        app:cardBackgroundColor="#111111"
-                        app:cardElevation="0dp"
+                        app:cardBackgroundColor="@color/color_card_bg"
+                        app:cardElevation="3dp"
                         app:cardPreventCornerOverlap="false">
                         <FrameLayout
                             android:layout_width="match_parent"
@@ -104,7 +210,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"
                                 android:scaleType="centerCrop"
-                                android:background="#1E1E1E"
+                                android:background="@color/color_card_elevated"
                                 android:visibility="gone"
                                 android:contentDescription="Slot 1"/>
                             <LinearLayout
@@ -118,22 +224,29 @@
                                     android:layout_width="32dp"
                                     android:layout_height="32dp"
                                     android:src="@drawable/ic_image"
-                                    android:tint="#555555"
+                                    android:tint="@color/color_steel"
                                     android:contentDescription="Add"/>
                                 <TextView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:text="صورة 1"
-                                    android:textColor="#666666"
+                                    android:textColor="@color/color_text_hint"
                                     android:textSize="11sp"
                                     android:layout_marginTop="6dp"/>
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="يبدأ تلقائياً"
+                                    android:textColor="@color/color_accent"
+                                    android:textSize="9sp"
+                                    android:layout_marginTop="2dp"/>
                             </LinearLayout>
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="1"
-                                android:textColor="#FFFFFF"
-                                android:textSize="11sp"
+                                android:textColor="@color/white"
+                                android:textSize="10sp"
                                 android:textStyle="bold"
                                 android:background="@drawable/bg_slot_badge"
                                 android:layout_gravity="top|start"
@@ -147,8 +260,8 @@
                                 android:layout_width="28dp"
                                 android:layout_height="28dp"
                                 android:src="@drawable/ic_close"
-                                android:background="#CC000000"
-                                android:tint="#EF4444"
+                                android:background="@drawable/bg_action_btn_danger"
+                                android:tint="@color/white"
                                 android:padding="6dp"
                                 android:visibility="gone"
                                 android:layout_gravity="top|end"
@@ -159,8 +272,8 @@
                                 android:layout_width="28dp"
                                 android:layout_height="28dp"
                                 android:src="@drawable/ic_rotate_cw"
-                                android:background="#CC000000"
-                                android:tint="#4F8EF7"
+                                android:background="@drawable/bg_action_btn_accent"
+                                android:tint="@color/white"
                                 android:padding="6dp"
                                 android:visibility="gone"
                                 android:layout_gravity="bottom|start"
@@ -184,14 +297,14 @@
                     app:layout_columnWeight="1"
                     app:layout_rowWeight="0"
                     app:layout_gravity="fill"
-                    android:layout_margin="6dp">
+                    android:layout_margin="5dp">
                     <androidx.cardview.widget.CardView
                         android:id="@+id/card_slot_2"
                         android:layout_width="match_parent"
                         android:layout_height="160dp"
                         app:cardCornerRadius="14dp"
-                        app:cardBackgroundColor="#111111"
-                        app:cardElevation="0dp"
+                        app:cardBackgroundColor="@color/color_card_bg"
+                        app:cardElevation="3dp"
                         app:cardPreventCornerOverlap="false">
                         <FrameLayout
                             android:layout_width="match_parent"
@@ -201,7 +314,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"
                                 android:scaleType="centerCrop"
-                                android:background="#1E1E1E"
+                                android:background="@color/color_card_elevated"
                                 android:visibility="gone"
                                 android:contentDescription="Slot 2"/>
                             <LinearLayout
@@ -215,13 +328,13 @@
                                     android:layout_width="32dp"
                                     android:layout_height="32dp"
                                     android:src="@drawable/ic_image"
-                                    android:tint="#555555"
+                                    android:tint="@color/color_steel"
                                     android:contentDescription="Add"/>
                                 <TextView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:text="صورة 2"
-                                    android:textColor="#666666"
+                                    android:textColor="@color/color_text_hint"
                                     android:textSize="11sp"
                                     android:layout_marginTop="6dp"/>
                             </LinearLayout>
@@ -229,8 +342,8 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="2"
-                                android:textColor="#FFFFFF"
-                                android:textSize="11sp"
+                                android:textColor="@color/white"
+                                android:textSize="10sp"
                                 android:textStyle="bold"
                                 android:background="@drawable/bg_slot_badge"
                                 android:layout_gravity="top|start"
@@ -244,8 +357,8 @@
                                 android:layout_width="28dp"
                                 android:layout_height="28dp"
                                 android:src="@drawable/ic_close"
-                                android:background="#CC000000"
-                                android:tint="#EF4444"
+                                android:background="@drawable/bg_action_btn_danger"
+                                android:tint="@color/white"
                                 android:padding="6dp"
                                 android:visibility="gone"
                                 android:layout_gravity="top|end"
@@ -256,8 +369,8 @@
                                 android:layout_width="28dp"
                                 android:layout_height="28dp"
                                 android:src="@drawable/ic_rotate_cw"
-                                android:background="#CC000000"
-                                android:tint="#4F8EF7"
+                                android:background="@drawable/bg_action_btn_accent"
+                                android:tint="@color/white"
                                 android:padding="6dp"
                                 android:visibility="gone"
                                 android:layout_gravity="bottom|start"
@@ -281,14 +394,14 @@
                     app:layout_columnWeight="1"
                     app:layout_rowWeight="0"
                     app:layout_gravity="fill"
-                    android:layout_margin="6dp">
+                    android:layout_margin="5dp">
                     <androidx.cardview.widget.CardView
                         android:id="@+id/card_slot_3"
                         android:layout_width="match_parent"
                         android:layout_height="160dp"
                         app:cardCornerRadius="14dp"
-                        app:cardBackgroundColor="#111111"
-                        app:cardElevation="0dp"
+                        app:cardBackgroundColor="@color/color_card_bg"
+                        app:cardElevation="3dp"
                         app:cardPreventCornerOverlap="false">
                         <FrameLayout
                             android:layout_width="match_parent"
@@ -298,7 +411,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"
                                 android:scaleType="centerCrop"
-                                android:background="#1E1E1E"
+                                android:background="@color/color_card_elevated"
                                 android:visibility="gone"
                                 android:contentDescription="Slot 3"/>
                             <LinearLayout
@@ -312,13 +425,13 @@
                                     android:layout_width="32dp"
                                     android:layout_height="32dp"
                                     android:src="@drawable/ic_image"
-                                    android:tint="#555555"
+                                    android:tint="@color/color_steel"
                                     android:contentDescription="Add"/>
                                 <TextView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:text="صورة 3"
-                                    android:textColor="#666666"
+                                    android:textColor="@color/color_text_hint"
                                     android:textSize="11sp"
                                     android:layout_marginTop="6dp"/>
                             </LinearLayout>
@@ -326,8 +439,8 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="3"
-                                android:textColor="#FFFFFF"
-                                android:textSize="11sp"
+                                android:textColor="@color/white"
+                                android:textSize="10sp"
                                 android:textStyle="bold"
                                 android:background="@drawable/bg_slot_badge"
                                 android:layout_gravity="top|start"
@@ -341,8 +454,8 @@
                                 android:layout_width="28dp"
                                 android:layout_height="28dp"
                                 android:src="@drawable/ic_close"
-                                android:background="#CC000000"
-                                android:tint="#EF4444"
+                                android:background="@drawable/bg_action_btn_danger"
+                                android:tint="@color/white"
                                 android:padding="6dp"
                                 android:visibility="gone"
                                 android:layout_gravity="top|end"
@@ -353,8 +466,8 @@
                                 android:layout_width="28dp"
                                 android:layout_height="28dp"
                                 android:src="@drawable/ic_rotate_cw"
-                                android:background="#CC000000"
-                                android:tint="#4F8EF7"
+                                android:background="@drawable/bg_action_btn_accent"
+                                android:tint="@color/white"
                                 android:padding="6dp"
                                 android:visibility="gone"
                                 android:layout_gravity="bottom|start"
@@ -378,14 +491,14 @@
                     app:layout_columnWeight="1"
                     app:layout_rowWeight="0"
                     app:layout_gravity="fill"
-                    android:layout_margin="6dp">
+                    android:layout_margin="5dp">
                     <androidx.cardview.widget.CardView
                         android:id="@+id/card_slot_4"
                         android:layout_width="match_parent"
                         android:layout_height="160dp"
                         app:cardCornerRadius="14dp"
-                        app:cardBackgroundColor="#111111"
-                        app:cardElevation="0dp"
+                        app:cardBackgroundColor="@color/color_card_bg"
+                        app:cardElevation="3dp"
                         app:cardPreventCornerOverlap="false">
                         <FrameLayout
                             android:layout_width="match_parent"
@@ -395,7 +508,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"
                                 android:scaleType="centerCrop"
-                                android:background="#1E1E1E"
+                                android:background="@color/color_card_elevated"
                                 android:visibility="gone"
                                 android:contentDescription="Slot 4"/>
                             <LinearLayout
@@ -409,13 +522,13 @@
                                     android:layout_width="32dp"
                                     android:layout_height="32dp"
                                     android:src="@drawable/ic_image"
-                                    android:tint="#555555"
+                                    android:tint="@color/color_steel"
                                     android:contentDescription="Add"/>
                                 <TextView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:text="صورة 4"
-                                    android:textColor="#666666"
+                                    android:textColor="@color/color_text_hint"
                                     android:textSize="11sp"
                                     android:layout_marginTop="6dp"/>
                             </LinearLayout>
@@ -423,8 +536,8 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="4"
-                                android:textColor="#FFFFFF"
-                                android:textSize="11sp"
+                                android:textColor="@color/white"
+                                android:textSize="10sp"
                                 android:textStyle="bold"
                                 android:background="@drawable/bg_slot_badge"
                                 android:layout_gravity="top|start"
@@ -438,8 +551,8 @@
                                 android:layout_width="28dp"
                                 android:layout_height="28dp"
                                 android:src="@drawable/ic_close"
-                                android:background="#CC000000"
-                                android:tint="#EF4444"
+                                android:background="@drawable/bg_action_btn_danger"
+                                android:tint="@color/white"
                                 android:padding="6dp"
                                 android:visibility="gone"
                                 android:layout_gravity="top|end"
@@ -450,8 +563,8 @@
                                 android:layout_width="28dp"
                                 android:layout_height="28dp"
                                 android:src="@drawable/ic_rotate_cw"
-                                android:background="#CC000000"
-                                android:tint="#4F8EF7"
+                                android:background="@drawable/bg_action_btn_accent"
+                                android:tint="@color/white"
                                 android:padding="6dp"
                                 android:visibility="gone"
                                 android:layout_gravity="bottom|start"
@@ -470,18 +583,54 @@
 
             </androidx.gridlayout.widget.GridLayout>
 
-            <!-- Section: Videos -->
-            <TextView
+            <!-- ══ SECTION: VIDEOS ══ -->
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="🎬  الفيديو"
-                android:textColor="#FFFFFF"
-                android:textSize="15sp"
-                android:textStyle="bold"
-                android:layout_marginTop="20dp"
-                android:layout_marginBottom="10dp"/>
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginTop="22dp"
+                android:layout_marginBottom="12dp">
 
-            <!-- 2x2 grid of video squares -->
+                <View
+                    android:layout_width="4dp"
+                    android:layout_height="18dp"
+                    android:background="@drawable/bg_section_indicator_video"
+                    android:layout_marginEnd="10dp"/>
+
+                <ImageView
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
+                    android:src="@drawable/ic_video"
+                    android:tint="@color/color_video_accent"
+                    android:contentDescription="Videos"
+                    android:layout_marginEnd="8dp"/>
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="الفيديو"
+                    android:textColor="@color/color_text_primary"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:letterSpacing="0.03"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="4 حقول"
+                    android:textColor="@color/color_video_accent"
+                    android:textSize="11sp"
+                    android:background="@drawable/bg_badge_count_video"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"
+                    android:paddingTop="3dp"
+                    android:paddingBottom="3dp"/>
+
+            </LinearLayout>
+
+            <!-- 2x2 grid of video slots -->
             <androidx.gridlayout.widget.GridLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -496,14 +645,14 @@
                     app:layout_columnWeight="1"
                     app:layout_rowWeight="0"
                     app:layout_gravity="fill"
-                    android:layout_margin="6dp">
+                    android:layout_margin="5dp">
                     <androidx.cardview.widget.CardView
                         android:id="@+id/card_slot_5"
                         android:layout_width="match_parent"
                         android:layout_height="160dp"
                         app:cardCornerRadius="14dp"
-                        app:cardBackgroundColor="#111111"
-                        app:cardElevation="0dp"
+                        app:cardBackgroundColor="@color/color_card_bg"
+                        app:cardElevation="3dp"
                         app:cardPreventCornerOverlap="false">
                         <FrameLayout
                             android:layout_width="match_parent"
@@ -513,7 +662,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"
                                 android:scaleType="centerCrop"
-                                android:background="#1E1E1E"
+                                android:background="@color/color_card_elevated"
                                 android:visibility="gone"
                                 android:contentDescription="Slot 5"/>
                             <LinearLayout
@@ -527,13 +676,13 @@
                                     android:layout_width="32dp"
                                     android:layout_height="32dp"
                                     android:src="@drawable/ic_video"
-                                    android:tint="#7C3AED"
+                                    android:tint="@color/color_video_accent"
                                     android:contentDescription="Add"/>
                                 <TextView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:text="فيديو 1"
-                                    android:textColor="#7C3AED"
+                                    android:textColor="@color/color_video_accent"
                                     android:textSize="11sp"
                                     android:layout_marginTop="6dp"/>
                             </LinearLayout>
@@ -541,10 +690,10 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="5"
-                                android:textColor="#FFFFFF"
-                                android:textSize="11sp"
+                                android:textColor="@color/white"
+                                android:textSize="10sp"
                                 android:textStyle="bold"
-                                android:backgroundTint="#7C3AED"
+                                android:backgroundTint="@color/color_video_accent"
                                 android:background="@drawable/bg_slot_badge"
                                 android:layout_gravity="top|start"
                                 android:layout_margin="6dp"
@@ -557,8 +706,8 @@
                                 android:layout_width="28dp"
                                 android:layout_height="28dp"
                                 android:src="@drawable/ic_close"
-                                android:background="#CC000000"
-                                android:tint="#EF4444"
+                                android:background="@drawable/bg_action_btn_danger"
+                                android:tint="@color/white"
                                 android:padding="6dp"
                                 android:visibility="gone"
                                 android:layout_gravity="top|end"
@@ -582,14 +731,14 @@
                     app:layout_columnWeight="1"
                     app:layout_rowWeight="0"
                     app:layout_gravity="fill"
-                    android:layout_margin="6dp">
+                    android:layout_margin="5dp">
                     <androidx.cardview.widget.CardView
                         android:id="@+id/card_slot_6"
                         android:layout_width="match_parent"
                         android:layout_height="160dp"
                         app:cardCornerRadius="14dp"
-                        app:cardBackgroundColor="#111111"
-                        app:cardElevation="0dp"
+                        app:cardBackgroundColor="@color/color_card_bg"
+                        app:cardElevation="3dp"
                         app:cardPreventCornerOverlap="false">
                         <FrameLayout
                             android:layout_width="match_parent"
@@ -599,7 +748,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"
                                 android:scaleType="centerCrop"
-                                android:background="#1E1E1E"
+                                android:background="@color/color_card_elevated"
                                 android:visibility="gone"
                                 android:contentDescription="Slot 6"/>
                             <LinearLayout
@@ -613,13 +762,13 @@
                                     android:layout_width="32dp"
                                     android:layout_height="32dp"
                                     android:src="@drawable/ic_video"
-                                    android:tint="#7C3AED"
+                                    android:tint="@color/color_video_accent"
                                     android:contentDescription="Add"/>
                                 <TextView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:text="فيديو 2"
-                                    android:textColor="#7C3AED"
+                                    android:textColor="@color/color_video_accent"
                                     android:textSize="11sp"
                                     android:layout_marginTop="6dp"/>
                             </LinearLayout>
@@ -627,10 +776,10 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="6"
-                                android:textColor="#FFFFFF"
-                                android:textSize="11sp"
+                                android:textColor="@color/white"
+                                android:textSize="10sp"
                                 android:textStyle="bold"
-                                android:backgroundTint="#7C3AED"
+                                android:backgroundTint="@color/color_video_accent"
                                 android:background="@drawable/bg_slot_badge"
                                 android:layout_gravity="top|start"
                                 android:layout_margin="6dp"
@@ -643,8 +792,8 @@
                                 android:layout_width="28dp"
                                 android:layout_height="28dp"
                                 android:src="@drawable/ic_close"
-                                android:background="#CC000000"
-                                android:tint="#EF4444"
+                                android:background="@drawable/bg_action_btn_danger"
+                                android:tint="@color/white"
                                 android:padding="6dp"
                                 android:visibility="gone"
                                 android:layout_gravity="top|end"
@@ -668,14 +817,14 @@
                     app:layout_columnWeight="1"
                     app:layout_rowWeight="0"
                     app:layout_gravity="fill"
-                    android:layout_margin="6dp">
+                    android:layout_margin="5dp">
                     <androidx.cardview.widget.CardView
                         android:id="@+id/card_slot_7"
                         android:layout_width="match_parent"
                         android:layout_height="160dp"
                         app:cardCornerRadius="14dp"
-                        app:cardBackgroundColor="#111111"
-                        app:cardElevation="0dp"
+                        app:cardBackgroundColor="@color/color_card_bg"
+                        app:cardElevation="3dp"
                         app:cardPreventCornerOverlap="false">
                         <FrameLayout
                             android:layout_width="match_parent"
@@ -685,7 +834,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"
                                 android:scaleType="centerCrop"
-                                android:background="#1E1E1E"
+                                android:background="@color/color_card_elevated"
                                 android:visibility="gone"
                                 android:contentDescription="Slot 7"/>
                             <LinearLayout
@@ -699,13 +848,13 @@
                                     android:layout_width="32dp"
                                     android:layout_height="32dp"
                                     android:src="@drawable/ic_video"
-                                    android:tint="#7C3AED"
+                                    android:tint="@color/color_video_accent"
                                     android:contentDescription="Add"/>
                                 <TextView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:text="فيديو 3"
-                                    android:textColor="#7C3AED"
+                                    android:textColor="@color/color_video_accent"
                                     android:textSize="11sp"
                                     android:layout_marginTop="6dp"/>
                             </LinearLayout>
@@ -713,10 +862,10 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="7"
-                                android:textColor="#FFFFFF"
-                                android:textSize="11sp"
+                                android:textColor="@color/white"
+                                android:textSize="10sp"
                                 android:textStyle="bold"
-                                android:backgroundTint="#7C3AED"
+                                android:backgroundTint="@color/color_video_accent"
                                 android:background="@drawable/bg_slot_badge"
                                 android:layout_gravity="top|start"
                                 android:layout_margin="6dp"
@@ -729,8 +878,8 @@
                                 android:layout_width="28dp"
                                 android:layout_height="28dp"
                                 android:src="@drawable/ic_close"
-                                android:background="#CC000000"
-                                android:tint="#EF4444"
+                                android:background="@drawable/bg_action_btn_danger"
+                                android:tint="@color/white"
                                 android:padding="6dp"
                                 android:visibility="gone"
                                 android:layout_gravity="top|end"
@@ -754,14 +903,14 @@
                     app:layout_columnWeight="1"
                     app:layout_rowWeight="0"
                     app:layout_gravity="fill"
-                    android:layout_margin="6dp">
+                    android:layout_margin="5dp">
                     <androidx.cardview.widget.CardView
                         android:id="@+id/card_slot_8"
                         android:layout_width="match_parent"
                         android:layout_height="160dp"
                         app:cardCornerRadius="14dp"
-                        app:cardBackgroundColor="#111111"
-                        app:cardElevation="0dp"
+                        app:cardBackgroundColor="@color/color_card_bg"
+                        app:cardElevation="3dp"
                         app:cardPreventCornerOverlap="false">
                         <FrameLayout
                             android:layout_width="match_parent"
@@ -771,7 +920,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"
                                 android:scaleType="centerCrop"
-                                android:background="#1E1E1E"
+                                android:background="@color/color_card_elevated"
                                 android:visibility="gone"
                                 android:contentDescription="Slot 8"/>
                             <LinearLayout
@@ -785,13 +934,13 @@
                                     android:layout_width="32dp"
                                     android:layout_height="32dp"
                                     android:src="@drawable/ic_video"
-                                    android:tint="#7C3AED"
+                                    android:tint="@color/color_video_accent"
                                     android:contentDescription="Add"/>
                                 <TextView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:text="فيديو 4"
-                                    android:textColor="#7C3AED"
+                                    android:textColor="@color/color_video_accent"
                                     android:textSize="11sp"
                                     android:layout_marginTop="6dp"/>
                             </LinearLayout>
@@ -799,10 +948,10 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="8"
-                                android:textColor="#FFFFFF"
-                                android:textSize="11sp"
+                                android:textColor="@color/white"
+                                android:textSize="10sp"
                                 android:textStyle="bold"
-                                android:backgroundTint="#7C3AED"
+                                android:backgroundTint="@color/color_video_accent"
                                 android:background="@drawable/bg_slot_badge"
                                 android:layout_gravity="top|start"
                                 android:layout_margin="6dp"
@@ -815,8 +964,8 @@
                                 android:layout_width="28dp"
                                 android:layout_height="28dp"
                                 android:src="@drawable/ic_close"
-                                android:background="#CC000000"
-                                android:tint="#EF4444"
+                                android:background="@drawable/bg_action_btn_danger"
+                                android:tint="@color/white"
                                 android:padding="6dp"
                                 android:visibility="gone"
                                 android:layout_gravity="top|end"
@@ -835,59 +984,56 @@
 
             </androidx.gridlayout.widget.GridLayout>
 
-            <!-- Start / Stop button -->
+            <!-- ══ START / STOP BUTTON ══ -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_start_stop"
                 android:layout_width="match_parent"
-                android:layout_height="64dp"
-                android:layout_marginTop="20dp"
+                android:layout_height="60dp"
+                android:layout_marginTop="22dp"
                 android:text="@string/start_vcam"
-                android:textSize="17sp"
+                android:textSize="16sp"
                 android:textStyle="bold"
-                android:textColor="#FFFFFF"
+                android:textColor="@color/white"
                 android:enabled="false"
-                app:cornerRadius="14dp"
+                android:letterSpacing="0.06"
+                app:cornerRadius="16dp"
                 app:icon="@drawable/ic_play"
                 app:iconGravity="textStart"
-                app:iconSize="26dp"
-                app:iconTint="#FFFFFF"
+                app:iconSize="24dp"
+                app:iconTint="@color/white"
                 android:backgroundTint="@color/color_start"/>
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="14dp"
-                android:text="@string/start_hint"
-                android:textColor="#444444"
-                android:textSize="12sp"
-                android:gravity="center"
-                android:lineSpacingExtra="3dp"/>
-
             <!-- ══ LINK CARD ══ -->
-            <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#1A1A1A" android:layout_marginTop="20dp" android:layout_marginBottom="16dp"/>
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/color_divider"
+                android:layout_marginTop="22dp"
+                android:layout_marginBottom="18dp"/>
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/link_title"
-                android:textColor="#888888"
+                android:textColor="@color/color_silver_dark"
                 android:textSize="11sp"
                 android:textAllCaps="false"
+                android:letterSpacing="0.05"
                 android:layout_marginBottom="10dp"/>
 
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"
-                app:cardCornerRadius="12dp"
-                app:cardBackgroundColor="#0A0A1A"
-                app:cardElevation="0dp">
+                app:cardCornerRadius="16dp"
+                app:cardBackgroundColor="@color/color_card_bg"
+                app:cardElevation="4dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="14dp">
+                    android:padding="16dp">
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -895,13 +1041,22 @@
                         android:orientation="horizontal"
                         android:gravity="center_vertical">
 
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:src="@drawable/ic_target"
+                            android:tint="@color/color_accent"
+                            android:contentDescription="Link"
+                            android:layout_marginEnd="10dp"/>
+
                         <TextView
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:text="@string/link_enable"
-                            android:textColor="#CCCCCC"
-                            android:textSize="14sp"/>
+                            android:textColor="@color/color_text_primary"
+                            android:textSize="14sp"
+                            android:textStyle="bold"/>
 
                         <com.google.android.material.switchmaterial.SwitchMaterial
                             android:id="@+id/switch_link"
@@ -916,42 +1071,87 @@
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
                         android:visibility="gone"
-                        android:layout_marginTop="12dp">
+                        android:layout_marginTop="14dp">
 
-                        <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#1A1A2E" android:layout_marginBottom="10dp"/>
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="1dp"
+                            android:background="@color/color_divider"
+                            android:layout_marginBottom="12dp"/>
 
-                        <TextView
-                            android:id="@+id/tv_link_port"
+                        <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="المنفذ: 7979"
-                            android:textColor="#4F8EF7"
-                            android:textSize="13sp"
-                            android:textStyle="bold"
-                            android:layout_marginBottom="4dp"/>
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical"
+                            android:layout_marginBottom="6dp">
 
-                        <TextView
-                            android:id="@+id/tv_link_token"
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="PORT"
+                                android:textColor="@color/color_silver_dark"
+                                android:textSize="10sp"
+                                android:textStyle="bold"
+                                android:letterSpacing="0.08"
+                                android:layout_marginEnd="8dp"/>
+
+                            <TextView
+                                android:id="@+id/tv_link_port"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text="7979"
+                                android:textColor="@color/color_accent"
+                                android:textSize="14sp"
+                                android:textStyle="bold"/>
+
+                        </LinearLayout>
+
+                        <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="الرمز: ——"
-                            android:textColor="#22C55E"
-                            android:textSize="18sp"
-                            android:textStyle="bold"
-                            android:letterSpacing="0.15"
-                            android:layout_marginBottom="8dp"/>
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical"
+                            android:layout_marginBottom="12dp">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="TOKEN"
+                                android:textColor="@color/color_silver_dark"
+                                android:textSize="10sp"
+                                android:textStyle="bold"
+                                android:letterSpacing="0.08"
+                                android:layout_marginEnd="8dp"/>
+
+                            <TextView
+                                android:id="@+id/tv_link_token"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text="——"
+                                android:textColor="@color/color_root_ok"
+                                android:textSize="20sp"
+                                android:textStyle="bold"
+                                android:letterSpacing="0.15"/>
+
+                        </LinearLayout>
 
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="@string/link_hint"
-                            android:textColor="#555555"
+                            android:textColor="@color/color_text_hint"
                             android:textSize="11sp"
-                            android:lineSpacingExtra="2dp"/>
+                            android:lineSpacingExtra="3dp"
+                            android:background="@drawable/bg_hint_box"
+                            android:padding="10dp"/>
                     </LinearLayout>
 
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
+
+            <!-- Bottom spacing -->
+            <View android:layout_width="match_parent" android:layout_height="24dp"/>
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
@@ -959,7 +1159,7 @@
     <!-- Hidden legacy views kept for binding compatibility -->
     <View android:id="@+id/layout_media_type" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
     <ImageView android:id="@+id/iv_media_preview" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
-    <androidx.cardview.widget.CardView android:id="@+id/card_media" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone" app:cardBackgroundColor="#000000">
+    <androidx.cardview.widget.CardView android:id="@+id/card_media" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone" app:cardBackgroundColor="@color/color_background">
         <TextView android:id="@+id/tv_media_selected" android:layout_width="wrap_content" android:layout_height="wrap_content" android:visibility="gone"/>
         <com.google.android.material.button.MaterialButton android:id="@+id/btn_clear_media" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="" android:visibility="gone" style="@style/Widget.MaterialComponents.Button.TextButton"/>
     </androidx.cardview.widget.CardView>

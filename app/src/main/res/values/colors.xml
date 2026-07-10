@@ -1,20 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="color_primary">#000000</color>
-    <color name="color_primary_dark">#000000</color>
-    <color name="color_accent">#4F8EF7</color>
-    <color name="color_accent_light">#1A2340</color>
-    <color name="color_background">#000000</color>
-    <color name="color_surface">#111111</color>
-    <color name="color_card_bg">#111111</color>
-    <color name="color_text_primary">#FFFFFF</color>
-    <color name="color_text_secondary">#888888</color>
-    <color name="color_start">#22C55E</color>
-    <color name="color_stop">#EF4444</color>
-    <color name="color_root_ok">#22C55E</color>
-    <color name="color_root_fail">#EF4444</color>
-    <color name="color_selected_card">#1A2340</color>
-    <color name="color_divider">#222222</color>
+    <!-- Silver/Steel primary palette -->
+    <color name="color_primary">#1C1C2E</color>
+    <color name="color_primary_dark">#12121F</color>
+    <color name="color_accent">#64B5F6</color>
+    <color name="color_accent_light">#1E2A3A</color>
+
+    <!-- Background layers -->
+    <color name="color_background">#12121F</color>
+    <color name="color_surface">#1C1C2E</color>
+    <color name="color_card_bg">#232338</color>
+    <color name="color_card_elevated">#2A2A42</color>
+
+    <!-- Silver/Steel tones -->
+    <color name="color_silver">#B0BEC5</color>
+    <color name="color_silver_light">#CFD8DC</color>
+    <color name="color_silver_dark">#78909C</color>
+    <color name="color_steel">#546E7A</color>
+
+    <!-- Text -->
+    <color name="color_text_primary">#ECEFF1</color>
+    <color name="color_text_secondary">#90A4AE</color>
+    <color name="color_text_hint">#546E7A</color>
+
+    <!-- Status colors -->
+    <color name="color_start">#26A65B</color>
+    <color name="color_stop">#C0392B</color>
+    <color name="color_root_ok">#26A65B</color>
+    <color name="color_root_fail">#C0392B</color>
+
+    <!-- Selected / Divider -->
+    <color name="color_selected_card">#1E2A3A</color>
+    <color name="color_divider">#2A2A42</color>
+
+    <!-- Accent for video slots -->
+    <color name="color_video_accent">#5C6BC0</color>
+    <color name="color_video_accent_bg">#1A1A35</color>
+
+    <!-- Utility -->
     <color name="white">#FFFFFF</color>
     <color name="black">#000000</color>
+    <color name="color_overlay_dark">#CC12121F</color>
 </resources>

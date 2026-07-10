@@ -4,103 +4,55 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#000000">
+    android:background="@color/color_primary_dark">
 
-    <!-- Zoomable image -->
     <ImageView
-        android:id="@+id/iv_preview_image"
+        android:id="@+id/iv_preview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:scaleType="matrix"
+        android:scaleType="fitCenter"
+        android:background="@color/color_primary_dark"
         android:contentDescription="Preview"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 
-    <!-- Top bar -->
+    <!-- Top controls bar -->
     <LinearLayout
-        android:id="@+id/preview_top_bar"
         android:layout_width="match_parent"
         android:layout_height="56dp"
         android:orientation="horizontal"
         android:gravity="center_vertical"
+        android:background="@color/color_overlay_dark"
         android:paddingStart="12dp"
         android:paddingEnd="12dp"
-        android:background="#AA000000"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
+        <ImageButton
+            android:id="@+id/btn_close"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@drawable/ic_close"
+            android:background="@drawable/bg_action_btn_accent"
+            android:tint="@color/white"
+            android:padding="10dp"
+            android:contentDescription="Close"/>
+
         <TextView
-            android:id="@+id/tv_preview_slot_label"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:textColor="#FFFFFF"
-            android:textSize="16sp"
+            android:text="@string/media_preview"
+            android:textColor="@color/color_text_primary"
+            android:textSize="15sp"
             android:textStyle="bold"
-            android:text="معاينة"/>
+            android:gravity="center"/>
 
-        <TextView
-            android:id="@+id/tv_preview_zoom"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="#AAAAAA"
-            android:textSize="13sp"
-            android:layout_marginEnd="12dp"
-            android:text="100%"/>
+        <View android:layout_width="40dp" android:layout_height="40dp"/>
 
-        <ImageButton
-            android:id="@+id/btn_preview_close"
-            android:layout_width="44dp"
-            android:layout_height="44dp"
-            android:src="@android:drawable/ic_menu_close_clear_cancel"
-            android:background="@android:color/transparent"
-            android:tint="#FFFFFF"
-            android:contentDescription="Close"/>
-    </LinearLayout>
-
-    <!-- Bottom zoom controls -->
-    <LinearLayout
-        android:id="@+id/preview_bottom_bar"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center"
-        android:background="#AA000000"
-        android:padding="4dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginBottom="24dp">
-
-        <Button
-            android:id="@+id/btn_preview_zoom_out"
-            android:layout_width="52dp"
-            android:layout_height="52dp"
-            android:text="−"
-            android:textSize="24sp"
-            android:textColor="#FFFFFF"
-            android:backgroundTint="#33FFFFFF"
-            style="@style/Widget.MaterialComponents.Button"/>
-
-        <TextView
-            android:layout_width="20dp"
-            android:layout_height="wrap_content"
-            android:text=""
-            android:layout_marginStart="6dp"
-            android:layout_marginEnd="6dp"/>
-
-        <Button
-            android:id="@+id/btn_preview_zoom_in"
-            android:layout_width="52dp"
-            android:layout_height="52dp"
-            android:text="+"
-            android:textSize="24sp"
-            android:textColor="#FFFFFF"
-            android:backgroundTint="#33FFFFFF"
-            style="@style/Widget.MaterialComponents.Button"/>
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
