@@ -186,6 +186,7 @@ class FloatWindowService : Service() {
         // ── Rotate ──
         view.findViewById<ImageButton>(R.id.btn_float_rotate)?.setOnClickListener {
             currentRotation = (currentRotation + 90) % 360
+            MediaSlotManager.setSlotRotation(this, activeSlot, currentRotation)
             sendBroadcast(Intent(ACTION_ROTATE).putExtra("rotation", currentRotation))
             view.findViewById<TextView>(R.id.tv_rotate_label)?.text = "${currentRotation}°"
             animateBounce(it)
@@ -401,9 +402,32 @@ class FloatWindowService : Service() {
             return
         }
         activeSlot = slot
+
+        // Sync rotation from stored slot rotation
+        currentRotation = MediaSlotManager.getSlotRotation(this, slot)
+        view.findViewById<TextView>(R.id.tv_rotate_label)?.text = "${currentRotation}°"
+
+        // Reset zoom/scale/pan for the new slot
+        zoomFactor = 1.0f
+        scaleFactor = 1.0f
+        panX = 0
+        panY = 0
+        updateZoomLabel(view)
+        updateScaleLabel(view)
+
         updateSlotButtonVisuals(view, slot)
         updateTypeLabel(view, slot)
         sendBroadcast(Intent(ACTION_SWITCH_SLOT).putExtra(EXTRA_SLOT, slot))
+
+        // Broadcast current rotation so VCamService applies it to the new slot
+        sendBroadcast(Intent(ACTION_ROTATE).putExtra("rotation", currentRotation))
+        // Broadcast reset zoom/scale/pan
+        sendBroadcast(Intent(ACTION_PAN_RESET)
+            .putExtra(EXTRA_PAN_X, 0)
+            .putExtra(EXTRA_PAN_Y, 0)
+            .putExtra(EXTRA_ZOOM_FACTOR, 1.0f)
+            .putExtra(EXTRA_SCALE_FACTOR, 1.0f))
+
         Toast.makeText(this, getString(R.string.slot_switched, slot), Toast.LENGTH_SHORT).show()
     }
 

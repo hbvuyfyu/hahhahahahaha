@@ -10,4 +10,15 @@
         <item name="android:windowLightStatusBar">false</item>
         <item name="android:fontFamily">sans-serif</item>
     </style>
+
+    <!-- Floating dialog theme for PreviewActivity -->
+    <style name="Theme.VCam.Dialog" parent="Theme.MaterialComponents.DayNight.Dialog">
+        <item name="colorPrimary">@color/color_accent</item>
+        <item name="colorAccent">@color/color_accent</item>
+        <item name="android:windowBackground">@drawable/bg_preview_dialog</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowMinWidthMajor">95%</item>
+        <item name="android:windowMinWidthMinor">95%</item>
+    </style>
 </resources>

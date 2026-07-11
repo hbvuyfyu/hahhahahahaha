@@ -193,19 +193,36 @@ class MainActivity : AppCompatActivity() {
                 if (!MediaSlotManager.isSlotSet(this, slot)) return@setOnClickListener
                 if (btn.tag == "rotating") return@setOnClickListener
                 btn.tag = "rotating"
+
+                // Animate the slot ImageView rotation (not the button)
+                val ivId = when (slot) {
+                    1 -> R.id.iv_slot_1; 2 -> R.id.iv_slot_2
+                    3 -> R.id.iv_slot_3; 4 -> R.id.iv_slot_4
+                    else -> null
+                }
+                val iv = ivId?.let { binding.root.findViewById<ImageView>(it) }
                 val currentDeg = MediaSlotManager.getSlotRotation(this, slot).toFloat()
                 val targetDeg = currentDeg + 90f
-                val animator = ObjectAnimator.ofFloat(btn, "rotation", currentDeg % 360f, targetDeg % 360f)
-                animator.duration = 260
-                animator.interpolator = AccelerateDecelerateInterpolator()
-                animator.start()
+
+                if (iv != null) {
+                    iv.animate()
+                        .rotation(targetDeg)
+                        .setDuration(250)
+                        .setInterpolator(AccelerateDecelerateInterpolator())
+                        .withEndAction {
+                            iv.rotation = 0f
+                            btn.tag = null
+                        }
+                        .start()
+                } else {
+                    btn.tag = null
+                }
+
+                // Persist rotation (fast, no disk I/O for the image)
                 lifecycleScope.launch {
                     val newDeg = withContext(Dispatchers.IO) {
                         MediaSlotManager.rotateSlot(this@MainActivity, slot)
                     }
-                    refreshSlotUI(slot)
-                    btn.rotation = 0f
-                    btn.tag = null
                     showSnack("الحقل $slot — تدوير ${newDeg}°")
                 }
             }

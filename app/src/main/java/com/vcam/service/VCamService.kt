@@ -198,32 +198,34 @@ class VCamService : Service() {
         val isVideo = MediaSlotManager.isSlotVideo(this, slot)
         serviceScope.launch {
             try {
+                val prevZoom  = injector?.zoomFactor    ?: 1f
+                val prevScale = injector?.frameFillScale ?: 1f
+                val prevPanX  = injector?.panX           ?: 0
+                val prevPanY  = injector?.panY           ?: 0
+                val prevRot   = injector?.rotation       ?: 0
+                val prevMirr  = injector?.mirror         ?: false
+
+                injector?.stopMonitorOnly()
+
                 val proxy = VcplaxEngine.getProxy()
                 if (proxy != null && VcplaxEngine.isRunning) {
                     proxy.switchSource(path, if (isVideo) 2 else 1)
-                } else {
-                    val prevZoom  = injector?.zoomFactor    ?: 1f
-                    val prevScale = injector?.frameFillScale ?: 1f
-                    val prevPanX  = injector?.panX           ?: 0
-                    val prevPanY  = injector?.panY           ?: 0
-                    val prevRot   = injector?.rotation       ?: 0
-                    val prevMirr  = injector?.mirror         ?: false
-                    injector?.stop()
-                    injector = CameraInjector(
-                        context       = this@VCamService,
-                        mediaPath     = path,
-                        isVideo       = isVideo,
-                        targetPackage = null
-                    ).also {
-                        it.zoomFactor    = prevZoom
-                        it.frameFillScale = prevScale
-                        it.panX          = prevPanX
-                        it.panY          = prevPanY
-                        it.rotation      = prevRot
-                        it.mirror        = prevMirr
-                    }
-                    injector?.start()
                 }
+
+                injector = CameraInjector(
+                    context       = this@VCamService,
+                    mediaPath     = path,
+                    isVideo       = isVideo,
+                    targetPackage = null
+                ).also {
+                    it.zoomFactor     = prevZoom
+                    it.frameFillScale = prevScale
+                    it.panX           = prevPanX
+                    it.panY           = prevPanY
+                    it.rotation       = prevRot
+                    it.mirror         = prevMirr
+                }
+                injector?.start()
                 updateNotification("VCam — Slot $slot Active",
                     if (isVideo) "🎬 فيديو ${slot - 4}" else "📷 صورة $slot")
             } catch (_: Exception) {}

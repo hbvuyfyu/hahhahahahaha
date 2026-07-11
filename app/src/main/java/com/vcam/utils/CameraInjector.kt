@@ -100,6 +100,18 @@ class CameraInjector(
         Log.d(TAG, "VCam stopped")
     }
 
+    /**
+     * Stop only the monitor loop but keep vcplax running.
+     * Used when switching slots so the new CameraInjector can reuse the
+     * already-running vcplax process instead of restarting it.
+     */
+    fun stopMonitorOnly() {
+        running = false
+        injectionJob?.cancel()
+        usingVcplax = false
+        Log.d(TAG, "Monitor stopped (vcplax kept alive)")
+    }
+
     // ── Core injection pipeline ─────────────────────────────────────────────
 
     private suspend fun performInjection() {
