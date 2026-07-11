@@ -348,7 +348,25 @@
 
             </LinearLayout>
 
-            <!-- Scale controls removed per user request -->
+            <!-- Scale controls removed from UI but IDs kept for code compatibility -->
+            <Button
+                android:id="@+id/btn_float_scale_up"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:visibility="gone"
+                android:text=""/>
+            <Button
+                android:id="@+id/btn_float_scale_down"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:visibility="gone"
+                android:text=""/>
+            <TextView
+                android:id="@+id/tv_float_scale_label"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:visibility="gone"
+                android:text=""/>
 
             <!-- Pan controls cross -->
             <LinearLayout
