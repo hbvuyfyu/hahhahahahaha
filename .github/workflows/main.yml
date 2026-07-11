@@ -109,10 +109,36 @@ jobs:
           path: conect_vcam/dist/ConectVCam.exe
           retention-days: 30
 
+  # ── Server (Node.js backend for Railway) ──────────────────────────────────
+  build-server:
+    name: Build Server
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 18
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+          cache: 'npm'
+          cache-dependency-path: server/package.json
+
+      - name: Install dependencies
+        working-directory: server
+        run: npm install
+
+      - name: Verify server starts
+        working-directory: server
+        run: |
+          timeout 5 node -e "require('./index.js')" 2>&1 || true
+
   # ── GitHub Release (main branch only) ────────────────────────────────────
   release:
     name: Create GitHub Release
-    needs: [build-android, build-windows]
+    needs: [build-android, build-windows, build-server]
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
 

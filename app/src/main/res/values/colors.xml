@@ -26,4 +26,9 @@
     <color name="white">#FFFFFF</color>
     <color name="black">#000000</color>
     <color name="color_overlay_dark">#CC12121F</color>
+    <color name="color_premium_gold">#FFD700</color>
+    <color name="color_premium_bg">#2A2410</color>
+    <color name="color_warning_bg">#2A1A14</color>
+    <color name="color_warning">#FF9800</color>
+    <color name="color_info">#64B5F6</color>
 </resources>

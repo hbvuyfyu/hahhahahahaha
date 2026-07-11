@@ -20,7 +20,7 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CAMERA" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
-    <!-- Network — required for license verification -->
+    <!-- Network — required for auth, subscription verification, and payments -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
@@ -43,9 +43,9 @@
         android:extractNativeLibs="true"
         android:usesCleartextTraffic="true">
 
-        <!-- Code/license gate — this is the LAUNCHER activity -->
+        <!-- Auth screen (login/signup) — this is the LAUNCHER activity -->
         <activity
-            android:name=".ui.CodeActivity"
+            android:name=".ui.AuthActivity"
             android:exported="true"
             android:screenOrientation="portrait">
             <intent-filter>
@@ -54,12 +54,30 @@
             </intent-filter>
         </activity>
 
-        <!-- Main app screen — only reachable after code verification -->
+        <!-- Main app screen — only reachable after auth -->
         <activity
             android:name=".ui.MainActivity"
             android:exported="false"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustResize"/>
+
+        <!-- Subscription screen -->
+        <activity
+            android:name=".ui.SubscriptionActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"/>
+
+        <!-- Account screen -->
+        <activity
+            android:name=".ui.AccountActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"/>
+
+        <!-- Payment WebView screen -->
+        <activity
+            android:name=".ui.PaymentWebViewActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"/>
 
         <!-- Media preview as floating dialog popup -->
         <activity

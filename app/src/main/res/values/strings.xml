@@ -53,4 +53,65 @@
     <string name="link_hint">وصّل الهاتف بالحاسوب عبر USB، ثم شغّل:\nadb forward tcp:7979 tcp:7979\nوأدخل الرمز في تطبيق Conect VCam</string>
     <string name="link_enabled_msg">تم تفعيل الربط — المنفذ 7979</string>
     <string name="link_disabled_msg">تم إيقاف الربط</string>
+
+    <!-- Auth strings -->
+    <string name="login_title">Welcome Back</string>
+    <string name="login_subtitle">Sign in to your Virtual Cam account</string>
+    <string name="signup_title">Create Account</string>
+    <string name="signup_subtitle">Sign up to start using Virtual Cam</string>
+    <string name="login_button">Sign In</string>
+    <string name="signup_button">Create Account</string>
+    <string name="switch_to_signup">Don\'t have an account? Sign up</string>
+    <string name="switch_to_login">Already have an account? Sign in</string>
+    <string name="email_label">Email</string>
+    <string name="password_label">Password</string>
+    <string name="email_required">Email is required</string>
+    <string name="password_required">Password is required</string>
+    <string name="password_min_length">Password must be at least 6 characters</string>
+    <string name="auth_failed">Authentication failed. Please try again.</string>
+    <string name="server_not_configured">Server URL not configured. Please set it in settings.</string>
+
+    <!-- Subscription strings -->
+    <string name="subscription_title">Subscription</string>
+    <string name="subscription_subtitle">Choose your plan</string>
+    <string name="current_subscription">Current Subscription</string>
+    <string name="choose_plan">اختر الباقة</string>
+    <string name="subscribe_now">اشترك الآن</string>
+    <string name="active_badge">Active</string>
+    <string name="no_subscription">No active subscription</string>
+    <string name="no_subscription_msg">You don\'t have an active subscription.\nChoose a plan below to get started.</string>
+    <string name="expires_on">Expires:</string>
+    <string name="remaining">Remaining:</string>
+    <string name="days_remaining">days remaining</string>
+    <string name="hours">hours</string>
+    <string name="days">days</string>
+
+    <!-- Payment strings -->
+    <string name="payment_title">Payment</string>
+    <string name="payment_subtitle">Complete your payment securely</string>
+    <string name="payment_success">Payment successful! Your subscription is now active.</string>
+    <string name="payment_failed">Payment failed or expired. Please try again.</string>
+    <string name="payment_pending">Payment is still pending. Please wait for confirmation.</string>
+    <string name="continue_to_app">Continue to App</string>
+    <string name="retry_payment">Retry Payment</string>
+
+    <!-- Account strings -->
+    <string name="account_title">My Account</string>
+    <string name="account_subtitle">Profile and payment history</string>
+    <string name="profile_section">Profile</string>
+    <string name="subscription_status_label">Subscription:</string>
+    <string name="plan_label">Plan:</string>
+    <string name="payment_history">Payment History</string>
+    <string name="no_payments">No payment records yet</string>
+    <string name="logout">Logout</string>
+
+    <!-- Subscription gate -->
+    <string name="subscription_required_title">Subscription Required</string>
+    <string name="subscription_required_msg">You need an active subscription to start Virtual Cam. Please subscribe to continue.</string>
+    <string name="go_to_subscription">Go to Subscription</string>
+    <string name="not_now">Not Now</string>
+
+    <!-- Navigation -->
+    <string name="nav_subscription">Subscription</string>
+    <string name="nav_account">My Account</string>
 </resources>

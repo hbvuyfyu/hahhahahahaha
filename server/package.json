@@ -1,0 +1,20 @@
+{
+  "name": "vcam-server",
+  "version": "1.0.0",
+  "description": "Backend server for Virtual Cam app — auth, subscriptions, OxaPay payments",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node index.js"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.4",
+    "cors": "^2.8.5",
+    "crypto": "^1.0.1",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

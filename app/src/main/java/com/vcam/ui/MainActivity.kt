@@ -17,7 +17,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
@@ -26,8 +25,9 @@ import com.vcam.R
 import com.vcam.databinding.ActivityMainBinding
 import com.vcam.service.ConnectServer
 import com.vcam.service.VCamService
-import com.vcam.utils.LicenseChecker
+import com.vcam.utils.ApiClient
 import com.vcam.utils.MediaSlotManager
+import com.vcam.utils.SessionManager
 import com.vcam.viewmodel.MainViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -48,7 +48,7 @@ class MainActivity : AppCompatActivity() {
                 MediaSlotManager.setSlot(this@MainActivity, slot, uri, isVideo)
             }
             refreshSlotUI(slot)
-            binding.btnStartStop.isEnabled = MediaSlotManager.isSlotSet(this@MainActivity, 1)
+            updateStartButtonState()
         }
     }
 
@@ -68,6 +68,13 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Guard: must be logged in
+        if (!SessionManager.isLoggedIn(this)) {
+            logoutToAuth()
+            return
+        }
+
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         setupObservers()
@@ -76,31 +83,74 @@ class MainActivity : AppCompatActivity() {
         setupRotateButtons()
         setupStartStop()
         setupLinkSwitch()
+        setupNavigationButtons()
         requestPermissions()
         (1..8).forEach { refreshSlotUI(it) }
-        binding.btnStartStop.isEnabled = MediaSlotManager.isSlotSet(this, 1)
+        updateStartButtonState()
+
+        // Check subscription status on launch
+        checkSubscriptionStatus()
     }
 
     override fun onResume() {
         super.onResume()
-        val savedCode = LicenseChecker.getSavedCode(this)
-        if (savedCode == null) { logoutToCodeScreen(); return }
-        lifecycleScope.launch {
-            val result = LicenseChecker.verifyCode(savedCode)
-            if (result == LicenseChecker.VerifyResult.INVALID ||
-                result == LicenseChecker.VerifyResult.SERVER_EMPTY) {
-                LicenseChecker.clearCode(this@MainActivity)
-                logoutToCodeScreen()
-            }
+        if (!SessionManager.isLoggedIn(this)) {
+            logoutToAuth()
+            return
         }
         refreshLinkUI()
+        checkSubscriptionStatus()
     }
 
-    private fun logoutToCodeScreen() {
-        startActivity(Intent(this, CodeActivity::class.java).apply {
+    private fun logoutToAuth() {
+        SessionManager.clearSession(this)
+        startActivity(Intent(this, AuthActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         })
         finish()
+    }
+
+    // ── Subscription check ─────────────────────────────────────────────────
+
+    private fun checkSubscriptionStatus() {
+        val serverUrl = ApiClient.getServerUrl(this)
+        val accessToken = SessionManager.getAccessToken(this)
+        if (serverUrl.isEmpty() || accessToken == null) return
+
+        lifecycleScope.launch {
+            val status = ApiClient.getSubscriptionStatus(serverUrl, accessToken)
+            if (status.active) {
+                SessionManager.saveSubscription(
+                    this@MainActivity,
+                    true,
+                    status.expiresAt,
+                    status.planName,
+                    status.planNameAr,
+                    status.price,
+                    status.daysRemaining,
+                )
+            } else {
+                SessionManager.saveSubscription(this@MainActivity, false)
+            }
+            updateStartButtonState()
+        }
+    }
+
+    private fun updateStartButtonState() {
+        val hasMedia = MediaSlotManager.isSlotSet(this, 1)
+        val hasSub = SessionManager.isSubscriptionActive(this)
+        binding.btnStartStop.isEnabled = hasMedia && hasSub
+    }
+
+    // ── Navigation buttons ─────────────────────────────────────────────────
+
+    private fun setupNavigationButtons() {
+        binding.root.findViewById<View>(R.id.btn_nav_subscription)?.setOnClickListener {
+            startActivity(Intent(this, SubscriptionActivity::class.java))
+        }
+        binding.root.findViewById<View>(R.id.btn_nav_account)?.setOnClickListener {
+            startActivity(Intent(this, AccountActivity::class.java))
+        }
     }
 
     // ── Observers ─────────────────────────────────────────────────────────
@@ -131,7 +181,6 @@ class MainActivity : AppCompatActivity() {
     // ── Slot pickers (1-4 images, 5-8 videos) ─────────────────────────────
 
     private fun setupSlotPickers() {
-        // Image slots 1-4
         listOf(
             R.id.btn_pick_slot_1 to 1,
             R.id.btn_pick_slot_2 to 2,
@@ -143,7 +192,6 @@ class MainActivity : AppCompatActivity() {
                 pickMedia.launch("image/*")
             }
         }
-        // Video slots 5-8
         listOf(
             R.id.btn_pick_slot_5 to 5,
             R.id.btn_pick_slot_6 to 6,
@@ -173,7 +221,7 @@ class MainActivity : AppCompatActivity() {
             binding.root.findViewById<ImageButton>(btnId)?.setOnClickListener {
                 MediaSlotManager.clearSlot(this, slot)
                 refreshSlotUI(slot)
-                if (slot == 1) binding.btnStartStop.isEnabled = false
+                if (slot == 1) updateStartButtonState()
                 showSnack("تم حذف الحقل $slot")
             }
         }
@@ -194,7 +242,6 @@ class MainActivity : AppCompatActivity() {
                 if (btn.tag == "rotating") return@setOnClickListener
                 btn.tag = "rotating"
 
-                // Animate the slot ImageView rotation (not the button)
                 val ivId = when (slot) {
                     1 -> R.id.iv_slot_1; 2 -> R.id.iv_slot_2
                     3 -> R.id.iv_slot_3; 4 -> R.id.iv_slot_4
@@ -218,7 +265,6 @@ class MainActivity : AppCompatActivity() {
                     btn.tag = null
                 }
 
-                // Persist rotation (fast, no disk I/O for the image)
                 lifecycleScope.launch {
                     val newDeg = withContext(Dispatchers.IO) {
                         MediaSlotManager.rotateSlot(this@MainActivity, slot)
@@ -328,10 +374,25 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun handleStart() {
+        if (!SessionManager.isSubscriptionActive(this)) {
+            showSubscriptionRequiredDialog()
+            return
+        }
         if (!MediaSlotManager.isSlotSet(this, 1)) {
             showSnack(getString(R.string.select_media_first)); return
         }
         checkOverlayThenStart()
+    }
+
+    private fun showSubscriptionRequiredDialog() {
+        MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.subscription_required_title)
+            .setMessage(R.string.subscription_required_msg)
+            .setPositiveButton(R.string.go_to_subscription) { _, _ ->
+                startActivity(Intent(this, SubscriptionActivity::class.java))
+            }
+            .setNegativeButton(R.string.not_now) { _, _ -> }
+            .show()
     }
 
     private fun checkOverlayThenStart() {

@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    app:cardCornerRadius="16dp"
+    app:cardBackgroundColor="@color/color_card_bg"
+    app:cardElevation="4dp"
+    android:layout_marginBottom="12dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="18dp">
+
+        <!-- Plan header -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="12dp">
+
+            <LinearLayout
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:gravity="center"
+                android:background="@drawable/bg_icon_circle_accent"
+                android:layout_marginEnd="14dp">
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_target"
+                    android:tint="@color/color_accent"
+                    android:contentDescription="Plan"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+                <TextView
+                    android:id="@+id/tv_plan_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Daily"
+                    android:textColor="@color/color_text_primary"
+                    android:textSize="16sp"
+                    android:textStyle="bold"/>
+                <TextView
+                    android:id="@+id/tv_plan_name_ar"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="يومي"
+                    android:textColor="@color/color_silver_dark"
+                    android:textSize="12sp"/>
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/tv_plan_price"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="$1"
+                android:textColor="@color/color_accent"
+                android:textSize="22sp"
+                android:textStyle="bold"/>
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/color_divider"
+            android:layout_marginBottom="12dp"/>
+
+        <!-- Duration -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="16dp">
+
+            <ImageView
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:src="@drawable/ic_refresh"
+                android:tint="@color/color_silver_dark"
+                android:contentDescription="Duration"
+                android:layout_marginEnd="8dp"/>
+
+            <TextView
+                android:id="@+id/tv_plan_duration"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="24 hours"
+                android:textColor="@color/color_text_secondary"
+                android:textSize="13sp"/>
+        </LinearLayout>
+
+        <!-- Subscribe button -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_subscribe"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:text="@string/subscribe_now"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:textColor="@color/white"
+            android:letterSpacing="0.04"
+            app:cornerRadius="12dp"
+            app:icon="@drawable/ic_play"
+            app:iconGravity="textStart"
+            app:iconSize="20dp"
+            app:iconTint="@color/white"
+            android:backgroundTint="@color/color_accent"/>
+
+    </LinearLayout>
+</androidx.cardview.widget.CardView>

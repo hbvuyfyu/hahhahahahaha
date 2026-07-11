@@ -64,6 +64,30 @@
             android:paddingEnd="12dp"
             android:paddingTop="5dp"
             android:paddingBottom="5dp"/>
+
+        <ImageButton
+            android:id="@+id/btn_nav_subscription"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:src="@drawable/ic_target"
+            android:tint="@color/color_accent"
+            android:background="?android:attr/selectableItemBackground"
+            android:contentDescription="Subscription"
+            android:layout_marginStart="10dp"
+            android:clickable="true"
+            android:focusable="true"/>
+
+        <ImageButton
+            android:id="@+id/btn_nav_account"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:src="@drawable/ic_camera_launcher"
+            android:tint="@color/color_text_primary"
+            android:background="?android:attr/selectableItemBackground"
+            android:contentDescription="Account"
+            android:layout_marginStart="6dp"
+            android:clickable="true"
+            android:focusable="true"/>
     </LinearLayout>
 
     <!-- Header bottom border -->
