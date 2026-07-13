@@ -11,8 +11,7 @@ import java.net.URL
 object ApiClient {
 
     private const val PREFS_NAME = "vcam_config"
-    private const val KEY_SERVER_URL = "server_url"
-
+    private const val KEY_SERVER_URL = "https://vcam-production.up.railway.app"
     fun getServerUrl(context: Context): String {
         return prefs(context).getString(KEY_SERVER_URL, "") ?: ""
     }
